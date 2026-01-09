@@ -1,19 +1,12 @@
 # DocSignals
 
-**What is DocSignals?**
+> **Structural and semantic signals for machine interpretability**
 
-DocSignals is a React-based frontend for analyzing and visualizing
-structural and semantic signals in HTML documents.
+DocSignals is a React-based frontend for analyzing and rendering
+structural and semantic signals in HTML documents as they are traversed by machines.
 
-**Structural and semantic signals for machine interpretability**
-
-DocSignals analyzes the *structure* of HTML documents as they are traversed by machines.
-It exposes measurable signals about document consistency, segmentation, and semantic explicitness —
-without scoring, ranking, or content evaluation.
-
-The tool is designed to answer a simple question:
-
-> **What does a machine actually have to read, traverse, and infer when processing this document?**
+It exposes measurable signals about document consistency, segmentation,
+and semantic explicitness — without scoring, ranking, or content evaluation.
 
 ---
 
