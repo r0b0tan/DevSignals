@@ -32,14 +32,19 @@ export function checkSemantics(html: string): SemanticResult {
   }
 
   const totalText = doc.body?.textContent?.length ?? 1;
+
+  // Get all landmark elements and filter to only top-level ones (not nested in other landmarks)
+  const landmarkSelector = LANDMARK_TAGS.join(', ');
+  const allLandmarks = doc.querySelectorAll(landmarkSelector);
   let landmarkText = 0;
-  for (const tag of LANDMARK_TAGS) {
-    const els = doc.querySelectorAll(tag);
-    for (const el of els) {
-      landmarkText += el.textContent?.length ?? 0;
-    }
+  for (const el of allLandmarks) {
+    // Skip if this landmark is nested inside another landmark
+    const isNested = el.parentElement?.closest(landmarkSelector) !== null;
+    if (isNested) continue;
+
+    landmarkText += el.textContent?.length ?? 0;
   }
-  const coveragePercent = Math.round((landmarkText / totalText) * 100);
+  const coveragePercent = Math.min(100, Math.round((landmarkText / totalText) * 100));
 
   // Div ratio
   const divCount = doc.querySelectorAll('div, span').length;
