@@ -82,6 +82,42 @@ function generateInterpretations(
     });
   }
 
+  // Max DOM depth
+  if (structure.maxDepth >= 15) {
+    interpretations.push({
+      category: 'Structure',
+      finding: `${structure.maxDepth} levels of nesting`,
+      implication: 'Deep nesting may require machines to traverse multiple layers to infer context.',
+    });
+  } else if (structure.maxDepth >= 10) {
+    interpretations.push({
+      category: 'Structure',
+      finding: `${structure.maxDepth} levels of nesting`,
+      implication: 'Moderate nesting depth; machines may need to traverse several layers to infer context.',
+    });
+  }
+
+  // Top-level sections
+  if (structure.topLevelSections >= 3) {
+    interpretations.push({
+      category: 'Structure',
+      finding: `${structure.topLevelSections} top-level sections`,
+      implication: 'Clear top-level segmentation allows machines to identify major content regions early during parsing.',
+    });
+  } else if (structure.topLevelSections > 0) {
+    interpretations.push({
+      category: 'Structure',
+      finding: `${structure.topLevelSections} top-level section${structure.topLevelSections === 1 ? '' : 's'}`,
+      implication: 'Limited top-level segmentation; machines may need to infer content region boundaries from other cues.',
+    });
+  } else {
+    interpretations.push({
+      category: 'Structure',
+      finding: 'No top-level sections',
+      implication: 'Without explicit top-level segmentation, machines must infer content region boundaries from context.',
+    });
+  }
+
   // Element composition
   const divPercent = Math.round(semantics.divRatio * 100);
   if (semantics.divRatio > 0.6) {
