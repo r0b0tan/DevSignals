@@ -167,9 +167,7 @@ but the core philosophy will remain unchanged.
 
 ## Author
 
-Built by **Christoph Bauer**
-
-Follow on GitHub: https://github.com/your-handle
+Built by **r0b0tan/cbauerdev**
 
 ---
 
