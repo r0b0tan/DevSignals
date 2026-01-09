@@ -1,109 +1,168 @@
-# DevSignals
+# DocSignals
 
-DevSignals is a small analysis tool that visualizes how explicitly a web page communicates its structure and semantics to machines.
+**Structural and semantic signals for machine interpretability**
 
-It focuses on **interpretability**, not ranking, quality, or optimization.
+DocSignals analyzes the *structure* of HTML documents as they are traversed by machines.
+It exposes measurable signals about document consistency, segmentation, and semantic explicitness —
+without scoring, ranking, or content evaluation.
 
+The tool is designed to answer a simple question:
 
-## What DevSignals Does
+> **What does a machine actually have to read, traverse, and infer when processing this document?**
 
-DevSignals analyzes a web document from a machine perspective and surfaces:
+---
 
-- whether the document structure is **deterministic** across repeated reads
-- how much meaning is encoded **explicitly in markup**
-- where machines must rely on **inference or heuristics**
+## What DocSignals is
 
-The tool deliberately avoids scores, grades, or recommendations.
+DocSignals is a document analysis tool that:
 
+- measures **structural properties** of HTML documents
+- detects **semantic signals encoded in markup**
+- makes **no quality judgments**
+- separates **measurement** from **interpretation**
 
-## What DevSignals Is *Not*
+It does **not** evaluate:
+- content quality
+- SEO performance
+- accessibility compliance
+- ranking potential
 
-DevSignals is **not**:
+DocSignals focuses solely on **document structure and explicitness**.
 
-- an SEO audit tool
-- a Lighthouse replacement
-- an accessibility checker
-- a ranking or optimization engine
-
-It does not answer *“Is this good or bad?”*  
-It answers *“What does a machine actually see?”*
+---
 
 ## Core Concepts
 
-### Structural Signals
+### 1. Measured Values
 
-Structural signals describe whether repeated fetches of a page produce the same structural representation.
+Measured Values are **raw observations** derived directly from document analysis.
+They are factual, reproducible, and interpretation-free.
 
-**This includes:**
+Examples include:
 
-- DOM stability across requests
-- consistent node ordering
-- absence of request-dependent structural variance
+**Structure**
+- Fetches performed
+- Structural differences across fetches
+- DOM node count
+- Maximum DOM depth
+- Top-level sections
+- Shadow DOM hosts
 
-**Classification:**
+**Semantics**
+- Heading structure (`h1` count, level gaps)
+- Top-level landmark usage
+- Generic container ratio (`div` / `span`)
+- Non-descriptive links
+- List structures
+- Table header markup
+- Language declaration
+- Machine-readable time elements
 
-- `deterministic`
-- `mostly-deterministic`
-- `unstable`
+These values describe **what exists**, not whether it is good or bad.
 
-### Semantic Signals
+---
 
-Semantic signals describe how much meaning is encoded directly in markup, rather than inferred from presentation or heuristics.
+### 2. Interpretation
 
-**Examples:**
+Interpretation translates measured values into **contextual implications for machine readers**.
 
-- heading hierarchy (`<h1>` usage, skipped levels)
-- landmark elements (`<main>`, `<nav>`, etc.)
-- reliance on generic containers (`div`, `span`)
-- link text clarity without surrounding context
+Interpretations are:
+- cautious
+- modal (using *may*, *can*, *require*)
+- non-judgmental
 
-**Classification:**
+Example:
 
-- `explicit`
-- `partial`
-- `opaque`
+> **Measured:** 29 levels of DOM nesting  
+> **Interpretation:** Machines may need to traverse multiple layers to infer context.
 
-### Observation → Interpretation
+Interpretation does **not** prescribe fixes or optimizations.
+It explains *what additional inference or traversal may be required*.
 
-DevSignals always separates:
+---
 
-- **What was observed**
-- **What this means for machines**
+## Shadow DOM
 
-There are no hidden weights or aggregate scores. Every output is explainable.
+DocSignals treats Shadow DOM as a **first-class structural reality**.
+
+If a document contains Shadow DOM:
+
+- it is measured
+- it is reported
+- it is interpreted once, without special weighting
+
+Shadow DOM is not flagged as a problem.
+It is acknowledged as part of modern document structures that machines must explicitly traverse.
+
+---
 
 ## Design Principles
 
-- Descriptive, not evaluative
-- No numeric scoring
-- No optimization advice
-- No “best practices” framing
-- Clear separation between observation and interpretation
+DocSignals is built around a few strict principles:
 
-The tool intentionally leaves judgment to the user.
+- **Measurement before interpretation**
+- **No scoring systems**
+- **No hidden heuristics**
+- **No “AI-ready” claims**
+- **No SEO framing**
 
-## Architecture Overview
+If a signal cannot be measured reliably, it is excluded.
 
-DevSignals is designed as a **deterministic analysis pipeline** with a UI.
+---
 
-- Analysis runs client-side
-- HTML is fetched multiple times
-- DOM is normalized and compared
-- Results are classified and rendered
+## Output
 
-There is no backend dependency required for core logic.
+Results can be exported as:
 
-## Tech Stack
+- JSON
+- CSV
 
-- React
-- TypeScript
-- Vite
-- Tailwind CSS
+This allows further processing, comparison, or integration into other analysis workflows.
 
-No UI frameworks or component libraries are used.
+---
 
-## Development
+## Intended Audience
 
-```bash
-npm install
-npm run dev
+DocSignals is built for:
+
+- developers interested in document structure
+- engineers working with crawlers, parsers, or agents
+- people thinking about how machines interpret HTML beyond visual rendering
+
+It assumes familiarity with HTML and DOM concepts.
+
+---
+
+## Scope and Limitations
+
+DocSignals analyzes **static document structure** as fetched.
+It does not:
+
+- execute JavaScript beyond initial rendering
+- simulate user interaction
+- infer intent
+- evaluate correctness of content
+
+Its purpose is to make **structural reality visible**, not to judge it.
+
+---
+
+## Status
+
+DocSignals is currently in **v1**.
+The scope is intentionally limited and stable.
+
+Future versions may expand measurement coverage,
+but the core philosophy will remain unchanged.
+
+---
+
+## Author
+
+Built by **Christoph Bauer**
+
+Follow on GitHub: https://github.com/your-handle
+
+---
+
+*DocSignals evaluates document structure, not content quality or ranking.*

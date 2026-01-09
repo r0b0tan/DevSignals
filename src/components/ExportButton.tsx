@@ -67,7 +67,7 @@ export function ExportButton({ result, url }: ExportButtonProps) {
   function handleExport(format: 'json' | 'csv') {
     const hostname = new URL(url).hostname;
     const timestamp = new Date().toISOString().split('T')[0];
-    const filename = `devsignals-${hostname}-${timestamp}.${format}`;
+    const filename = `docsignals-${hostname}-${timestamp}.${format}`;
 
     if (format === 'json') {
       const content = generateJSON(result, url);

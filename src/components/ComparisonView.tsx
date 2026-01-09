@@ -252,7 +252,7 @@ export function ComparisonView({ entries, onClose }: ComparisonViewProps) {
               onClick={() => {
                 const content = generateComparisonJSON(entries);
                 const timestamp = new Date().toISOString().split('T')[0];
-                downloadFile(content, `devsignals-comparison-${timestamp}.json`, 'application/json');
+                downloadFile(content, `docsignals-comparison-${timestamp}.json`, 'application/json');
               }}
               className="rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50"
             >
@@ -262,7 +262,7 @@ export function ComparisonView({ entries, onClose }: ComparisonViewProps) {
               onClick={() => {
                 const content = generateComparisonCSV(entries);
                 const timestamp = new Date().toISOString().split('T')[0];
-                downloadFile(content, `devsignals-comparison-${timestamp}.csv`, 'text/csv');
+                downloadFile(content, `docsignals-comparison-${timestamp}.csv`, 'text/csv');
               }}
               className="rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50"
             >
@@ -303,13 +303,13 @@ export function saveAnalysis(url: string, result: AnalysisResult) {
       result,
     };
     const updated = [entry, ...history].slice(0, 10); // Keep last 10
-    localStorage.setItem('devSignalsAnalyses', JSON.stringify(updated));
+    localStorage.setItem('docSignalsAnalyses', JSON.stringify(updated));
   } catch {}
 }
 
 export function getAnalysisHistory(): AnalysisEntry[] {
   try {
-    const data = localStorage.getItem('devSignalsAnalyses');
+    const data = localStorage.getItem('docSignalsAnalyses');
     return data ? JSON.parse(data) : [];
   } catch {
     return [];
@@ -318,6 +318,6 @@ export function getAnalysisHistory(): AnalysisEntry[] {
 
 export function clearAnalysisHistory() {
   try {
-    localStorage.removeItem('devSignalsAnalyses');
+    localStorage.removeItem('docSignalsAnalyses');
   } catch {}
 }

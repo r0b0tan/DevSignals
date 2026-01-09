@@ -25,7 +25,7 @@ function proxyRequest(
       method: 'GET',
       headers: {
         'Host': targetUrl.host,
-        'User-Agent': 'DevSignals/1.0',
+        'User-Agent': 'DocSignals/1.0',
         Accept: 'text/html',
       },
     },

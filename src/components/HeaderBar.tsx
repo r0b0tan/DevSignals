@@ -15,7 +15,7 @@ const EXAMPLE_URLS = [
 
 function getUrlHistory(): string[] {
   try {
-    const history = localStorage.getItem('devSignalsHistory');
+    const history = localStorage.getItem('docSignalsHistory');
     return history ? JSON.parse(history) : [];
   } catch {
     return [];
@@ -26,7 +26,7 @@ function saveToHistory(url: string) {
   try {
     const history = getUrlHistory();
     const updated = [url, ...history.filter(u => u !== url)].slice(0, 5);
-    localStorage.setItem('devSignalsHistory', JSON.stringify(updated));
+    localStorage.setItem('docSignalsHistory', JSON.stringify(updated));
   } catch {}
 }
 
@@ -79,7 +79,7 @@ export function HeaderBar({
           {/* Brand block: name and claim inline */}
           <div className="flex items-baseline gap-2">
             <h1 className="text-lg font-semibold tracking-tight text-indigo-600">
-              DevSignals
+              DocSignals
             </h1>
             <span>|</span>
             <span className="hidden text-sm text-gray-400 sm:inline">
