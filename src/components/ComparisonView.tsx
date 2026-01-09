@@ -1,6 +1,5 @@
 import type { AnalysisResult } from '../analysis/types';
 
-
 interface AnalysisEntry {
   url: string;
   timestamp: string;
@@ -10,6 +9,64 @@ interface AnalysisEntry {
 interface ComparisonViewProps {
   entries: AnalysisEntry[];
   onClose: () => void;
+}
+
+function generateComparisonCSV(entries: AnalysisEntry[]): string {
+  const headers = ['Metric', ...entries.map((_, i) => `Analysis ${i + 1}`)];
+
+  const rows = [
+    headers,
+    ['URL', ...entries.map(e => new URL(e.url).hostname)],
+    ['Timestamp', ...entries.map(e => new Date(e.timestamp).toISOString())],
+    ['', ...entries.map(() => '')],
+    ['STRUCTURE', ...entries.map(() => '')],
+    ['Classification', ...entries.map(e => e.result.structure.classification)],
+    ['Difference Count', ...entries.map(e => e.result.structure.differenceCount.toString())],
+    ['DOM Nodes', ...entries.map(e => e.result.structure.domNodes.toString())],
+    ['Max DOM Depth', ...entries.map(e => e.result.structure.maxDepth.toString())],
+    ['Top-level Sections', ...entries.map(e => e.result.structure.topLevelSections.toString())],
+    ['Shadow DOM Hosts', ...entries.map(e => e.result.structure.customElements.toString())],
+    ['', ...entries.map(() => '')],
+    ['SEMANTICS', ...entries.map(() => '')],
+    ['Classification', ...entries.map(e => e.result.semantics.classification)],
+    ['H1 Count', ...entries.map(e => e.result.semantics.headings.h1Count.toString())],
+    ['Has Heading Skips', ...entries.map(e => e.result.semantics.headings.hasSkips ? 'Yes' : 'No')],
+    ['Landmark Coverage %', ...entries.map(e => e.result.semantics.landmarks.coveragePercent.toString())],
+    ['Div/Span Ratio', ...entries.map(e => `${(e.result.semantics.divRatio * 100).toFixed(1)}%`)],
+    ['Link Issues', ...entries.map(e => e.result.semantics.linkIssues.toString())],
+    ['Time Elements (total)', ...entries.map(e => e.result.semantics.timeElements.total.toString())],
+    ['Time Elements (with datetime)', ...entries.map(e => e.result.semantics.timeElements.withDatetime.toString())],
+    ['List Structures', ...entries.map(e => e.result.semantics.lists.total.toString())],
+    ['Tables (total)', ...entries.map(e => e.result.semantics.tables.total.toString())],
+    ['Tables (with headers)', ...entries.map(e => e.result.semantics.tables.withHeaders.toString())],
+    ['Lang Attribute', ...entries.map(e => e.result.semantics.langAttribute ? 'Yes' : 'No')],
+  ];
+
+  return rows.map(row => row.map(cell => `"${cell}"`).join(';')).join('\n');
+}
+
+function generateComparisonJSON(entries: AnalysisEntry[]): string {
+  return JSON.stringify({
+    exportedAt: new Date().toISOString(),
+    analyses: entries.map(e => ({
+      url: e.url,
+      timestamp: e.timestamp,
+      structure: e.result.structure,
+      semantics: e.result.semantics,
+    })),
+  }, null, 2);
+}
+
+function downloadFile(content: string, filename: string, mimeType: string) {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }
 
 function ComparisonMetricRow({ 
@@ -33,7 +90,22 @@ function ComparisonMetricRow({
 
 export function ComparisonView({ entries, onClose }: ComparisonViewProps) {
   if (entries.length === 0) {
-    return null;
+    return (
+      <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4">
+        <div className="my-8 w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">No Analyses to Compare</h2>
+          <p className="mb-6 text-sm text-gray-600">
+            Run at least two analyses to compare them. Each analysis is saved automatically.
+          </p>
+          <button
+            onClick={onClose}
+            className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -91,9 +163,25 @@ export function ComparisonView({ entries, onClose }: ComparisonViewProps) {
                 label="Difference Count"
                 values={entries.map(e => e.result.structure.differenceCount)}
               />
-              
+              <ComparisonMetricRow
+                label="DOM Nodes"
+                values={entries.map(e => e.result.structure.domNodes?.toLocaleString() ?? '-')}
+              />
+              <ComparisonMetricRow
+                label="Max DOM Depth"
+                values={entries.map(e => e.result.structure.maxDepth ?? '-')}
+              />
+              <ComparisonMetricRow
+                label="Top-level Sections"
+                values={entries.map(e => e.result.structure.topLevelSections ?? '-')}
+              />
+              <ComparisonMetricRow
+                label="Shadow DOM Hosts"
+                values={entries.map(e => e.result.structure.customElements ?? '-')}
+              />
+
               <tr><td colSpan={entries.length + 1} className="py-2"></td></tr>
-              
+
               <tr className="bg-gray-50">
                 <td colSpan={entries.length + 1} className="py-2 px-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
                   Semantics
@@ -123,17 +211,64 @@ export function ComparisonView({ entries, onClose }: ComparisonViewProps) {
                 label="Link Issues"
                 values={entries.map(e => e.result.semantics.linkIssues)}
               />
+              <ComparisonMetricRow
+                label="Time Elements"
+                values={entries.map(e => {
+                  const te = e.result.semantics.timeElements;
+                  if (!te) return '-';
+                  return te.total === 0 ? '0' : `${te.withDatetime}/${te.total}`;
+                })}
+              />
+              <ComparisonMetricRow
+                label="List Structures"
+                values={entries.map(e => e.result.semantics.lists?.total ?? '-')}
+              />
+              <ComparisonMetricRow
+                label="Tables"
+                values={entries.map(e => {
+                  const t = e.result.semantics.tables;
+                  if (!t) return '-';
+                  return t.total === 0 ? '0' : `${t.withHeaders}/${t.total} with headers`;
+                })}
+              />
+              <ComparisonMetricRow
+                label="Lang Attribute"
+                values={entries.map(e => e.result.semantics.langAttribute === undefined ? '-' : (e.result.semantics.langAttribute ? 'Yes' : 'No'))}
+              />
             </tbody>
           </table>
         </div>
 
-        <div className="border-t border-gray-200 px-6 py-4">
+        <div className="flex items-center justify-between border-t border-gray-200 px-6 py-4">
           <button
             onClick={onClose}
             className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
           >
-            Close Comparison
+            Close
           </button>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">Export:</span>
+            <button
+              onClick={() => {
+                const content = generateComparisonJSON(entries);
+                const timestamp = new Date().toISOString().split('T')[0];
+                downloadFile(content, `devsignals-comparison-${timestamp}.json`, 'application/json');
+              }}
+              className="rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50"
+            >
+              JSON
+            </button>
+            <button
+              onClick={() => {
+                const content = generateComparisonCSV(entries);
+                const timestamp = new Date().toISOString().split('T')[0];
+                downloadFile(content, `devsignals-comparison-${timestamp}.csv`, 'text/csv');
+              }}
+              className="rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50"
+            >
+              CSV
+            </button>
+          </div>
         </div>
       </div>
     </div>
