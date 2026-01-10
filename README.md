@@ -1,12 +1,10 @@
 # DocSignals
 
-> **Structural and semantic signals for machine interpretability**
+> **Structural signals for machine interpretability**
 
-DocSignals is a React-based frontend for analyzing and rendering
-structural and semantic signals in HTML documents as they are traversed by machines.
+DocSignals is a React-based tool for analyzing structural and semantic signals in HTML documents as they are traversed by machines.
 
-It exposes measurable signals about document consistency, segmentation,
-and semantic explicitness — without scoring, ranking, or content evaluation.
+It exposes measurable signals about document consistency, segmentation, and semantic explicitness — without scoring, ranking, or content evaluation.
 
 ---
 
@@ -29,15 +27,43 @@ DocSignals focuses solely on **document structure and explicitness**.
 
 ---
 
+## Features
+
+- **URL Analysis** — Enter any URL to analyze its document structure
+- **Multiple Fetch Samples** — Configurable number of fetches to detect structural differences
+- **Analysis History** — Recent analyses are stored locally for comparison
+- **Export** — Results can be exported as JSON or CSV
+- **Help Documentation** — Built-in help page with detailed explanations
+
+---
+
 ## Tech Stack
 
 - React 18 (UI framework)
 - TypeScript (static typing)
 - Vite (build and dev tooling)
-- Tailwind CSS (utility-first styling)
+- Tailwind CSS v4 (utility-first styling)
+- React Router (client-side routing)
 
 ---
 
+## Getting Started
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+---
 
 ## Core Concepts
 
@@ -155,9 +181,31 @@ Its purpose is to make **structural reality visible**, not to judge it.
 
 ---
 
+## Project Structure
+
+```
+src/
+├── analysis/        # Document analysis logic
+│   ├── index.ts     # Main analysis entry point
+│   ├── compare.ts   # Comparison between fetches
+│   ├── semantics.ts # Semantic signal detection
+│   └── types.ts     # TypeScript types
+├── components/      # React components
+│   ├── Dashboard.tsx
+│   ├── HeaderBar.tsx
+│   ├── HomePage.tsx
+│   ├── HelpPage.tsx
+│   └── ...
+├── utils/           # Utility functions
+├── App.tsx          # Main app with routing
+└── main.tsx         # Entry point
+```
+
+---
+
 ## Status
 
-DocSignals is currently in **v1**.
+DocSignals is currently in **v0.1.0**.
 The scope is intentionally limited and stable.
 
 Future versions may expand measurement coverage,
