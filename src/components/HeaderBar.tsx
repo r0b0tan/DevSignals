@@ -86,14 +86,15 @@ export function HeaderBar({
   return (
     <header className="bg-white shadow-sm">
       <div className="mx-auto max-w-5xl px-4 py-4 sm:px-6 sm:py-5">
-        {/* App shell: brand + action on same row at md+ */}
+        {/* App shell: brand left, action right */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          {/* Brand block: name and claim inline */}
-          <div className="flex items-baseline gap-2">
+          {/* Brand block: logo, name and claim inline */}
+          <div className="flex items-center gap-2">
+            <img src="/docsignals.png" alt="DocSignals" className="h-5 w-5" />
             <h1 className="text-lg font-semibold tracking-tight text-indigo-600">
               DocSignals
             </h1>
-            <span>|</span>
+            <span className="text-gray-300">|</span>
             <span className="hidden text-sm text-gray-400 sm:inline">
               Structural signals for machine interpretability
             </span>
@@ -102,7 +103,7 @@ export function HeaderBar({
           {/* Action area */}
           <div className="flex items-center gap-2 flex-1 md:max-w-md md:flex-initial">
             {mode === 'analysis' && onUrlChange && onSubmit ? (
-              <form onSubmit={handleSubmit} className="flex-1 md:flex-initial">
+              <form onSubmit={handleSubmit} className="w-full">
                 <div className="relative">
                   <div className="flex gap-2">
                     <div className="relative min-w-0 flex-1 md:w-64">
