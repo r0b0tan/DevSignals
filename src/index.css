@@ -5,6 +5,10 @@
 }
 
 @layer base {
+  html {
+    scrollbar-gutter: stable;
+  }
+
   body {
     @apply text-zinc-800 antialiased;
   }

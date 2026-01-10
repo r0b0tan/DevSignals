@@ -4,7 +4,6 @@ export { TechnicalMetrics } from './TechnicalMetrics';
 export { InterpretationPanel } from './InterpretationPanel';
 export { ExportButton } from './ExportButton';
 export { ComparisonView, ComparisonButton, saveAnalysis, getAnalysisHistory } from './ComparisonView';
-export { ComparisonPage } from './ComparisonPage';
 export { HomePage } from './HomePage';
 export { FooterNote } from './FooterNote';
 export { Code } from './Code';

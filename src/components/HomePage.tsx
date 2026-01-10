@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { analyze, type AnalysisResult } from '../analysis';
 import { validateUrl, fetchHtml } from '../fetch';
 import { Dashboard } from './Dashboard';
@@ -16,7 +15,6 @@ function delay(ms: number): Promise<void> {
 }
 
 export function HomePage() {
-  const navigate = useNavigate();
   const [url, setUrl] = useState('');
   const [state, setState] = useState<State>({ status: 'idle' });
   const [fetchCount, setFetchCount] = useState(3);
@@ -65,7 +63,6 @@ export function HomePage() {
       url={url}
       onUrlChange={setUrl}
       onSubmit={run}
-      onCompare={() => navigate('/compare')}
       fetchCount={fetchCount}
       onFetchCountChange={setFetchCount}
     />
