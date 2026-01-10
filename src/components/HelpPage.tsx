@@ -18,7 +18,8 @@ const helpEntries: HelpEntry[] = [
     term: 'Structure Consistency',
     category: 'Structure',
     shortDescription: 'How consistent is the HTML structure across repeated visits?',
-    longDescription: 'DevSignals fetches a page multiple times and compares the HTML structure. When the structure is identical on each fetch, machines (crawlers, screen readers, etc.) can reliably process the page. Variable structure can lead to inconsistent results.',
+    longDescription:
+      'DevSignals fetches the same URL multiple times and compares the resulting DOM tree shape (e.g., element nesting, tag sequence, and the presence/absence of structural nodes). If repeated fetches yield an effectively identical structure, downstream automation—such as crawlers, content extractors, test automation, and assistive-tech mappings—can rely on stable selectors and a stable reading order. If the structure changes between requests (e.g., due to personalization, A/B tests, geo-variation, rotating ad slots, or client-side rendering differences), identical queries can return different nodes or different content regions, leading to brittle extraction and inconsistent interpretation.',
     example: 'A page with randomly positioned ad banners has different structure on each fetch.',
     goodValue: 'Deterministic (identical across multiple fetches)',
     badValue: 'Non-deterministic (different structure on each fetch)',
@@ -27,7 +28,8 @@ const helpEntries: HelpEntry[] = [
     term: 'Structure Depth',
     category: 'Structure',
     shortDescription: 'How deeply are HTML elements nested?',
-    longDescription: 'Maximum nesting depth shows how many layers of HTML elements are nested inside each other. Deep nesting (>15 levels) can complicate parsing and may indicate overly complex layouts.',
+    longDescription:
+      'Structure depth refers to the maximum nesting level of elements in the parsed DOM (i.e., the longest ancestor chain from the document root to any element). Very deep trees are harder to reason about, often correlate with over-wrapped layouts (excess <div>/<span> layers), and can increase complexity for traversal algorithms (querying, diffing, accessibility mapping). In practice, extreme depth can also be a signal of heavy component nesting or framework-generated wrappers, which may reduce robustness of selectors and complicate segmentation.',
     example: '<div><div><div><span>Text</span></div></div></div> has a depth of 4.',
     goodValue: 'Under 10 levels',
     badValue: 'Over 15 levels',
@@ -36,7 +38,8 @@ const helpEntries: HelpEntry[] = [
     term: 'Structure Sections',
     category: 'Structure',
     shortDescription: 'How many main sections does the page have at the top level?',
-    longDescription: 'Top-level sections are direct children of the <body> element or <main> area. Clear sections help machines quickly grasp the page structure and identify important regions.',
+    longDescription:
+      'This signal approximates whether the page exposes a clear, machine-discernible “layout skeleton”. DevSignals looks for high-level regions that segment the document (commonly direct children of <body> and/or primary containers like <main>). A small number of well-defined sections (e.g., header, navigation, main content, sidebar, footer) makes it easier for machines to isolate primary content, ignore boilerplate, and establish a stable reading order. Pages that present one monolithic container or many unstructured siblings are harder to segment reliably.',
     goodValue: '3 or more clearly defined sections',
     badValue: 'No recognizable segmentation',
   },
@@ -44,7 +47,8 @@ const helpEntries: HelpEntry[] = [
     term: 'Shadow DOM',
     category: 'Structure',
     shortDescription: 'Are Web Components with encapsulated DOM used?',
-    longDescription: 'Shadow DOM is a technique used by Web Components that "hides" parts of the DOM. Content inside Shadow DOM is not visible to standard DOM traversal methods, which can challenge crawlers and screen readers.',
+    longDescription:
+      'Shadow DOM encapsulates a subtree behind a shadow root. While this is beneficial for component isolation, it can reduce visibility for tools that only traverse the light DOM. Depending on whether shadow roots are open/closed and how content is projected (slots), crawlers, DOM-based extractors, and some accessibility tooling may miss or misattribute content unless they explicitly traverse the composed tree. Heavy reliance on Shadow DOM can therefore make content discovery and structural analysis less straightforward.',
     example: '<my-widget> with Shadow Root contains content that document.querySelector cannot find.',
   },
 
@@ -53,7 +57,8 @@ const helpEntries: HelpEntry[] = [
     term: 'Semantic Headings',
     category: 'Semantics',
     shortDescription: 'How is the heading hierarchy structured?',
-    longDescription: 'Headings (H1-H6) structure content hierarchically. A well-structured page has exactly one H1 as the main heading and follows a logical sequence without skips (e.g., H2 after H1, not H4 after H1).',
+    longDescription:
+      'Heading elements (H1–H6) define a document outline that both assistive technologies and automated parsers use to navigate and summarize content. A technically strong heading structure typically includes a single primary H1 for the page/topic and a monotonic, non-skipping hierarchy for subsequent sections (e.g., H2 for major sections, H3 for subsections). Skips (e.g., jumping from H2 to H4) and multiple competing H1s degrade outline quality, making navigation, summarization, and section extraction less reliable.',
     example: 'H1 → H2 → H3 → H2 → H3 is correct. H1 → H3 → H2 has a skip.',
     goodValue: '1 H1, sequential hierarchy without skips',
     badValue: 'No H1, multiple H1s, or skips in hierarchy',
@@ -62,7 +67,8 @@ const helpEntries: HelpEntry[] = [
     term: 'H1 Element',
     category: 'Semantics',
     shortDescription: 'The main heading of a page',
-    longDescription: 'The H1 element should describe the main title or topic of the page. It should appear only once per page. Multiple H1s or a missing H1 make it harder for machines to identify the main topic.',
+    longDescription:
+      'The H1 should represent the primary topic/title of the document as presented to users. Many tooling pipelines (search, summarizers, accessibility navigation) treat the H1 as the top-level anchor for understanding “what this page is about”. Missing H1s force heuristics (e.g., largest text, logo, title tag), and multiple H1s can introduce ambiguity about the primary topic, especially on pages that are aggregations or dashboards.',
     goodValue: 'Exactly 1 H1 per page',
     badValue: 'No H1 or multiple H1s',
   },
@@ -70,7 +76,8 @@ const helpEntries: HelpEntry[] = [
     term: 'Heading Hierarchy Gaps',
     category: 'Semantics',
     shortDescription: 'Are heading levels skipped?',
-    longDescription: 'A skip occurs when, for example, an H4 follows directly after an H2 (H3 is missing). This can hinder navigation with screen readers and break the logical document structure.',
+    longDescription:
+      'A hierarchy gap occurs when heading levels jump by more than one step (e.g., H2 directly followed by H4). Technically, this breaks the implied outline structure and can confuse screen-reader “heading navigation” as well as automated sectioning algorithms. Gaps often indicate visual styling being used in place of semantic structure (e.g., choosing H4 for smaller font size instead of using CSS on the correct level).',
     example: 'H1 → H2 → H4 skips H3.',
   },
 
@@ -79,7 +86,8 @@ const helpEntries: HelpEntry[] = [
     term: 'Semantic Landmarks',
     category: 'Semantics',
     shortDescription: 'How much content is within semantic regions?',
-    longDescription: 'Landmark elements like <main>, <nav>, <header>, <footer>, <aside>, and <article> mark important page regions. A high percentage of content within these regions enables better navigation and content extraction.',
+    longDescription:
+      'Landmark elements (<main>, <nav>, <header>, <footer>, <aside>, <article>) and equivalent ARIA landmark roles create navigational regions in the accessibility tree. When most meaningful content is placed inside these regions, assistive technologies can offer region-jump shortcuts, and automated extractors can distinguish primary content from boilerplate more reliably. Low landmark coverage usually means the page relies on generic containers, requiring heuristics to infer region semantics from class names or layout.',
     example: '<main>Main content</main><aside>Sidebar</aside>',
     goodValue: '80% or more content in landmarks',
     badValue: 'Under 50% in landmarks',
@@ -88,37 +96,43 @@ const helpEntries: HelpEntry[] = [
     term: 'main',
     category: 'Landmarks',
     shortDescription: 'Main content of the page',
-    longDescription: 'The <main> element contains the central content of a page, excluding repeated elements like navigation or footer. Screen readers can jump directly to the main content.',
+    longDescription:
+      'The <main> element identifies the dominant content of the document. It should exclude repeated UI such as site navigation, header chrome, and footer links. In accessibility APIs, <main> typically maps to the “main” landmark, enabling quick navigation and improving extraction of the central article/product/page content.',
   },
   {
     term: 'nav',
     category: 'Landmarks',
     shortDescription: 'Navigation area',
-    longDescription: 'The <nav> element marks areas with navigation links. This allows screen reader users to skip navigation or target it specifically.',
+    longDescription:
+      'The <nav> element indicates a section that provides navigation links (site navigation, table of contents, pagination). Marking navigation explicitly helps assistive technologies allow users to skip or target navigation regions, and helps automated systems separate boilerplate navigation from unique page content.',
   },
   {
     term: 'header',
     category: 'Landmarks',
     shortDescription: 'Header area of page or section',
-    longDescription: 'The <header> element contains introductory content or navigation links. In the context of <body>, it represents the page header.',
+    longDescription:
+      'The <header> element contains introductory content for the nearest sectioning root (or the page when used under <body>). It commonly contains branding, headings, and navigation. Correct use clarifies structure without relying on visual layout and can improve region-based navigation in the accessibility tree.',
   },
   {
     term: 'footer',
     category: 'Landmarks',
     shortDescription: 'Footer area of page or section',
-    longDescription: 'The <footer> element typically contains copyright information, links to legal documents, or contact information.',
+    longDescription:
+      'The <footer> element identifies concluding content for the nearest sectioning root (or the page). Typical content includes legal links, secondary navigation, contact info, and related resources. Explicit footers help tools categorize and potentially de-prioritize boilerplate content during extraction.',
   },
   {
     term: 'aside',
     category: 'Landmarks',
     shortDescription: 'Supplementary content (sidebar)',
-    longDescription: 'The <aside> element contains content related to the main content but that could also stand alone – e.g., sidebars, pull-quotes, or advertisements.',
+    longDescription:
+      'The <aside> element represents tangential or complementary content (sidebars, related links, callouts). Properly marking asides helps machines avoid conflating secondary content with the primary narrative, and helps assistive technologies provide region navigation semantics.',
   },
   {
     term: 'article',
     category: 'Landmarks',
     shortDescription: 'Self-contained, reusable content',
-    longDescription: 'The <article> element wraps self-contained content like blog posts, news articles, or comments that would make sense outside the current context.',
+    longDescription:
+      'The <article> element marks a self-contained unit that could be independently distributed or reused (e.g., a blog post, news item, comment). For machine processing, articles are useful boundaries for chunking, summarization, indexing, and repeated-layout pages that contain multiple independent content blocks.',
   },
 
   // Semantic Markup
@@ -126,7 +140,8 @@ const helpEntries: HelpEntry[] = [
     term: 'Semantic Markup',
     category: 'Semantics',
     shortDescription: 'Ratio of generic to semantic elements',
-    longDescription: 'The proportion of <div> and <span> (generic containers without meaning) compared to semantic elements. A high proportion of generic containers means meaning must be derived from class names or visual styling.',
+    longDescription:
+      'This signal estimates how much of the document is expressed with generic containers (<div>/<span>) versus semantic elements (e.g., <main>, <nav>, <section>, <article>, <button>, <time>, headings). Semantic elements provide intrinsic meaning that is reflected in the accessibility tree and is easier to interpret programmatically. A high generic ratio typically means meaning is encoded only via CSS and class names, which is more brittle for crawlers, readers, and downstream extraction pipelines.',
     goodValue: 'Under 40% generic containers',
     badValue: 'Over 60% generic containers',
   },
@@ -134,7 +149,8 @@ const helpEntries: HelpEntry[] = [
     term: 'Generic Containers',
     category: 'Semantics',
     shortDescription: 'div and span elements',
-    longDescription: '<div> and <span> are generic containers without inherent semantic meaning. They are useful for styling, but semantic alternatives should be used where possible for machine readability.',
+    longDescription:
+      '<div> and <span> are semantically neutral. They are appropriate for grouping and styling, but overuse can remove explicit meaning from the markup. When important regions or controls are built from generic containers, machines must infer intent from attributes, classes, and event handlers, which is less reliable than using purpose-built elements (or correct ARIA roles when necessary).',
     example: 'Instead of <div class="nav">, use <nav>',
   },
 
@@ -143,7 +159,8 @@ const helpEntries: HelpEntry[] = [
     term: 'Semantic Links',
     category: 'Semantics',
     shortDescription: 'Do links have descriptive labels?',
-    longDescription: 'Links should be understandable from their text alone. "Click here" or "More" are not descriptive. Screen reader users often navigate through a list of all links – these must be understandable without context.',
+    longDescription:
+      'Link text (and more generally, the accessible name of interactive elements) should communicate destination or action without requiring surrounding context. Many assistive-technology users navigate by listing links; similarly, extractors often treat anchor text as a label for the target resource. Generic labels like “Click here”, “More”, or icon-only links without accessible names reduce usability and degrade machine interpretability.',
     example: '"Download product catalog" instead of "Click here"',
     goodValue: 'All links have descriptive text',
     badValue: 'Links with "click here", "more", or empty text',
@@ -152,7 +169,8 @@ const helpEntries: HelpEntry[] = [
     term: 'Non-descriptive Links',
     category: 'Semantics',
     shortDescription: 'Links without clear purpose',
-    longDescription: 'Non-descriptive links include: empty links, links with generic text like "here", "more", "read more", or javascript: links. These hinder navigation and comprehension.',
+    longDescription:
+      'Non-descriptive links include anchors with empty/whitespace text, vague labels (e.g., “here”, “more”, “read more”), or links that do not represent real navigation (e.g., javascript: pseudo-links). These patterns degrade keyboard/screen-reader navigation and reduce the signal quality for crawlers and summarizers that rely on link labels to infer structure and intent.',
   },
 
   // Time
@@ -160,7 +178,8 @@ const helpEntries: HelpEntry[] = [
     term: 'Semantic Time',
     category: 'Semantics',
     shortDescription: 'Are dates marked up for machine readability?',
-    longDescription: 'The <time> element with datetime attribute makes dates machine-readable. "January 3, 2024" can have many formats – datetime="2024-01-03" is unambiguous.',
+    longDescription:
+      'Using <time> with a valid datetime attribute provides an unambiguous, machine-parseable representation of dates/times (ISO-8601 recommended). Human-readable strings vary by locale and formatting, but datetime enables consistent parsing for indexing, sorting, timeline extraction, and accessibility tooling that may announce times with locale-appropriate formatting.',
     example: '<time datetime="2024-01-03">January 3, 2024</time>',
     goodValue: 'All time elements have datetime attribute',
     badValue: 'time without datetime or only plain text dates',
@@ -171,7 +190,8 @@ const helpEntries: HelpEntry[] = [
     term: 'Semantic Lists',
     category: 'Semantics',
     shortDescription: 'Are enumerations marked up as lists?',
-    longDescription: 'HTML provides <ul> (unordered), <ol> (numbered), and <dl> (definition lists). This markup allows machines to recognize list items and announce the count.',
+    longDescription:
+      'Lists (<ul>, <ol>, <dl>) encode enumeration semantics: item boundaries, count, and (for ordered lists) sequence. This improves screen-reader announcements (e.g., “list of N items”) and makes extraction straightforward (each <li> as an item). Visual bullet points built from <div>s are harder to interpret programmatically and can lose item boundaries.',
     example: '<ul><li>Item 1</li><li>Item 2</li></ul>',
   },
 
@@ -180,7 +200,8 @@ const helpEntries: HelpEntry[] = [
     term: 'Semantic Tables',
     category: 'Semantics',
     shortDescription: 'Do tables have header markup?',
-    longDescription: 'Tables should use <thead> or <th> elements to identify column or row headers. Without this markup, machines cannot distinguish between labels and data.',
+    longDescription:
+      'Data tables should identify headers using <th> (optionally grouped in <thead>) so user agents can associate each data cell with its corresponding row/column labels. For complex tables, attributes like scope or headers may be required to disambiguate associations. Without header markup, machines cannot reliably distinguish labels from values, harming accessibility and automated extraction/CSV-style conversion.',
     example: '<table><thead><tr><th>Name</th><th>Price</th></tr></thead>...</table>',
     goodValue: 'All data tables with <th> or <thead>',
     badValue: 'Tables without header markup',
@@ -191,7 +212,8 @@ const helpEntries: HelpEntry[] = [
     term: 'Semantic Language',
     category: 'Semantics',
     shortDescription: 'Is the document language declared?',
-    longDescription: 'The lang attribute on <html> (e.g., lang="en") tells browsers and screen readers the language. This enables correct pronunciation, hyphenation, and text processing.',
+    longDescription:
+      'Declaring document language via <html lang="..."> informs browsers and accessibility APIs about the primary language of the content. This enables correct pronunciation, braille translation rules, hyphenation, spellchecking behavior, and language-aware NLP pipelines. Missing or incorrect lang values can cause mispronunciation and reduce quality of language-specific processing.',
     example: '<html lang="en">',
     goodValue: 'lang attribute present',
     badValue: 'No lang attribute',
@@ -202,7 +224,8 @@ const helpEntries: HelpEntry[] = [
     term: 'Image Accessibility',
     category: 'Images',
     shortDescription: 'Do images have alt text?',
-    longDescription: 'The alt attribute describes image content for screen readers and displays when images fail to load. An empty alt="" marks an image as decorative (no content). Missing alt leaves machines uncertain.',
+    longDescription:
+      'The alt attribute provides the textual alternative used by screen readers and by tools that cannot or do not load images. Informative images should have meaningful alt text; purely decorative images should use alt="" so they are skipped. Missing alt reduces accessibility and forces machines to guess meaning from filenames or surrounding text.',
     example: '<img src="photo.jpg" alt="Team photo at the holiday party">',
     goodValue: 'All images have alt attribute',
     badValue: 'Images without alt attribute',
@@ -211,14 +234,16 @@ const helpEntries: HelpEntry[] = [
     term: 'Image Context',
     category: 'Images',
     shortDescription: 'Are images embedded in figure elements?',
-    longDescription: 'The <figure> element with optional <figcaption> semantically groups an image with its caption. This helps machines understand the relationship between image and caption.',
+    longDescription:
+      '<figure> provides a semantic container that groups media with an optional <figcaption>. This explicitly binds a caption/description to the image, which helps machines understand what text describes what media, improves extraction of “image + caption” pairs, and clarifies boundaries compared to loosely positioned captions in generic containers.',
     example: '<figure><img src="chart.png" alt="..."><figcaption>Revenue growth 2023</figcaption></figure>',
   },
   {
     term: 'Decorative Images',
     category: 'Images',
     shortDescription: 'Images without informational meaning',
-    longDescription: 'Decorative images (backgrounds, dividers, icons without information) should have alt="". This tells screen readers they can be skipped.',
+    longDescription:
+      'Decorative images convey no content (e.g., separators, background flourishes, purely aesthetic icons). Marking them with alt="" prevents redundant or noisy announcements in screen readers and reduces false positives for systems extracting “meaningful images”. If an icon conveys meaning (e.g., “Warning”), it should not be treated as decorative.',
     example: '<img src="decorative-line.png" alt="">',
   },
 
@@ -227,37 +252,43 @@ const helpEntries: HelpEntry[] = [
     term: 'Deterministic',
     category: 'Classification',
     shortDescription: 'Structure is identical on each fetch',
-    longDescription: 'A deterministic structure means the HTML output remains the same across repeated visits. This is ideal for crawlers and machine processing.',
+    longDescription:
+      '“Deterministic” means repeated requests produce structurally equivalent HTML/DOM: the same major regions, stable element nesting, and stable node presence. Minor differences that do not affect structure (e.g., cache headers) are not relevant, but DOM-level changes usually indicate runtime variability. Determinism improves reliability of selectors, diffing, automated testing, and machine extraction.',
   },
   {
     term: 'Mostly Deterministic',
     category: 'Classification',
     shortDescription: 'Structure is mostly stable with minor variations',
-    longDescription: 'With mostly deterministic structure, there are only small differences between fetches – e.g., timestamps or session IDs. The core structure remains stable.',
+    longDescription:
+      '“Mostly deterministic” indicates the page’s core layout is stable, but small, localized variability exists across fetches (e.g., timestamps, rotating IDs, small recommendation modules). For machines, this usually means primary content can be extracted reliably, but strict DOM diffs or brittle selectors may still fail unless variability is accounted for (normalization, robust selectors, ignoring volatile regions).',
   },
   {
     term: 'Non-Deterministic',
     category: 'Classification',
     shortDescription: 'Structure varies significantly between fetches',
-    longDescription: 'With non-deterministic structure, the HTML layout changes substantially between fetches. This can be caused by A/B tests, personalized content, or dynamic components.',
+    longDescription:
+      '“Non-deterministic” indicates substantial DOM structure changes across repeated fetches (not just text changes): sections appear/disappear, order changes, or component trees differ. Common causes include A/B experiments, personalization, geo/device adaptation, ad auctions, or client-side rendering that depends on runtime state. This materially increases the difficulty of stable extraction, regression testing, and consistent interpretation.',
   },
   {
     term: 'Explicit',
     category: 'Classification',
     shortDescription: 'High semantic quality',
-    longDescription: 'An "explicit" semantic rating means: good heading structure, high landmark coverage, few generic containers, and descriptive links. Machines can understand the page well.',
+    longDescription:
+      '“Explicit” means the document encodes intent in markup rather than relying on styling and heuristics: a clear heading outline (one H1 and logical levels), broad use of landmark regions, descriptive link text / accessible names, and appropriate semantic elements for lists, tables, and time. As a result, both accessibility tooling and automated parsers can locate and interpret core content with minimal guessing.',
   },
   {
     term: 'Partial',
     category: 'Classification',
     shortDescription: 'Medium semantic quality',
-    longDescription: 'With "partial" semantics, some best practices are implemented, but there is room for improvement. Machines can partially process the page well.',
+    longDescription:
+      '“Partial” indicates some semantic best practices are present, but gaps remain (e.g., landmarks exist but coverage is incomplete, headings are mostly correct but contain skips, links are mixed quality, or generic containers dominate certain regions). Machines can often extract key content, but with reduced confidence and more reliance on heuristics compared to an “explicit” page.',
   },
   {
     term: 'Opaque',
     category: 'Classification',
     shortDescription: 'Low semantic quality',
-    longDescription: 'An "opaque" rating indicates missing semantic structure. Machines must use heuristics and visual analysis to understand the content.',
+    longDescription:
+      '“Opaque” indicates that little meaning is expressed via semantic HTML/ARIA patterns: structure is dominated by generic wrappers, landmarks/headings are missing or inconsistent, and interactive/navigation elements may not have reliable accessible names. In this state, automated systems typically must infer intent from fragile signals (CSS classes, visual layout, text proximity, click handlers), which is error-prone and can break easily when markup or styling changes.',
   },
 ];
 
