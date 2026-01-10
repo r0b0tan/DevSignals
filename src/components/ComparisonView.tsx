@@ -277,18 +277,19 @@ export function ComparisonView({ entries, onClose }: ComparisonViewProps) {
 
 interface ComparisonButtonProps {
   onCompare: () => void;
-  analysisCount: number;
 }
 
-export function ComparisonButton({ onCompare, analysisCount }: ComparisonButtonProps) {
+export function ComparisonButton({ onCompare }: ComparisonButtonProps) {
   return (
     <button
       onClick={onCompare}
-      disabled={analysisCount < 2}
-      className="rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-      title={analysisCount < 2 ? 'Run at least 2 analyses to compare' : 'Compare analyses'}
+      className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50"
+      title="Compare analyses"
     >
-      Compare ({analysisCount})
+      Compare
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+      </svg>
     </button>
   );
 }

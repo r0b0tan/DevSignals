@@ -17,13 +17,12 @@ interface DashboardProps {
   url: string;
   onUrlChange: (url: string) => void;
   onSubmit: () => void;
-  analysisCount: number;
   onCompare: () => void;
   fetchCount: number;
   onFetchCountChange: (count: number) => void;
 }
 
-export function Dashboard({ state, url, onUrlChange, onSubmit, analysisCount, onCompare, fetchCount, onFetchCountChange }: DashboardProps) {
+export function Dashboard({ state, url, onUrlChange, onSubmit, onCompare, fetchCount, onFetchCountChange }: DashboardProps) {
   return (
     <div className="min-h-screen bg-white">
       <HeaderBar
@@ -86,7 +85,7 @@ export function Dashboard({ state, url, onUrlChange, onSubmit, analysisCount, on
                     <option value={5}>5</option>
                   </select>
                 </div>
-                <ComparisonButton onCompare={onCompare} analysisCount={analysisCount} />
+                <ComparisonButton onCompare={onCompare} />
               </div>
             </div>
 
