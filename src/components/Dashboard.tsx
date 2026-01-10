@@ -482,7 +482,13 @@ function ComparisonContent({ entries, onBack }: { entries: AnalysisEntry[]; onBa
       </section>
 
       {/* Export Section - same position as Analysis view */}
-      <div className="flex justify-end">
+      <div className="flex justify-between items-center mt-4">
+        <button
+          onClick={() => window.open('/help', '_blank')}
+          className="rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-indigo-600 ring-1 ring-indigo-600 hover:bg-indigo-50"
+        >
+          Help
+        </button>
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-600">Export:</span>
           <button
@@ -713,7 +719,13 @@ export function Dashboard({ state, url, onUrlChange, onSubmit, fetchCount, onFet
               />
             </section>
 
-            <div className="flex justify-end">
+            <div className="flex justify-between items-center mt-4">
+              <button
+                onClick={() => window.open('/help', '_blank')}
+                className="rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-indigo-600 ring-1 ring-indigo-600 hover:bg-indigo-50"
+              >
+                Help
+              </button>
               <ExportButton result={state.result} url={url} />
             </div>
 

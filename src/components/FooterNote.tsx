@@ -1,6 +1,6 @@
 export function FooterNote() {
   return (
-    <footer className="pt-10 text-center space-y-2">
+    <footer className="pt-4 text-center space-y-2">
       <p className="text-xs text-gray-400">
         DocSignals evaluates document structure, not content quality or ranking.
       </p>

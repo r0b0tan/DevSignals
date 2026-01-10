@@ -126,13 +126,6 @@ export function HeaderBar({
                     >
                       {isRunning ? 'Analyzing...' : 'Analyze'}
                     </button>
-                    <button
-                      type="button"
-                      onClick={handleHelpClick}
-                      className="shrink-0 rounded-lg bg-white px-4 py-2 text-sm font-medium text-indigo-600 ring-1 ring-indigo-600 hover:bg-indigo-50"
-                    >
-                      Help
-                    </button>
                   </div>
 
                   {/* Suggestions dropdown */}
