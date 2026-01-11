@@ -1,3 +1,6 @@
+# Deploy credentials
+.deploy-credentials
+
 # Logs
 logs
 *.log

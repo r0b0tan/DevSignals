@@ -35,7 +35,9 @@ export async function fetchHtml(url: string): Promise<FetchResult> {
 
   try {
     // Use the proxy to avoid CORS issues
-    const proxyUrl = `/proxy?url=${encodeURIComponent(url)}`;
+    // In dev mode, use /proxy (Vite middleware). In production, use Cloudflare Worker
+    const proxyEndpoint = import.meta.env.DEV ? '/proxy' : 'https://docsignals-proxy.wutzewatz.workers.dev';
+    const proxyUrl = `${proxyEndpoint}?url=${encodeURIComponent(url)}`;
     const response = await fetch(proxyUrl, {
       signal: controller.signal,
       headers: {

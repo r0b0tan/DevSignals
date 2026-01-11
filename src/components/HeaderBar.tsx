@@ -90,7 +90,7 @@ export function HeaderBar({
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           {/* Brand block: logo, name and claim inline */}
           <div className="flex items-center gap-2">
-            <img src="/docsignals.png" alt="DocSignals" className="h-5 w-5" />
+            <img src={`${import.meta.env.BASE_URL}docsignals.png`} alt="DocSignals" className="h-5 w-5" />
             <h1 className="text-lg font-semibold tracking-tight text-indigo-600">
               DocSignals
             </h1>

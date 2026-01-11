@@ -65,6 +65,65 @@ npm run preview
 
 ---
 
+## Proxy Configuration
+
+DocSignals requires a proxy to fetch external URLs (to avoid CORS restrictions).
+
+### Local Development
+
+The Vite dev server includes a built-in proxy at `/proxy`. No additional setup required.
+
+### Production Deployment
+
+For production, you need to provide your own proxy solution. Options include:
+
+**Cloudflare Worker (recommended):**
+```javascript
+export default {
+  async fetch(request) {
+    const url = new URL(request.url);
+    const targetUrl = url.searchParams.get('url');
+
+    if (request.method === 'OPTIONS') {
+      return new Response(null, {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        },
+      });
+    }
+
+    if (!targetUrl) {
+      return new Response('Missing url parameter', { status: 400 });
+    }
+
+    try {
+      const response = await fetch(targetUrl, {
+        headers: { 'User-Agent': 'DocSignals/1.0', 'Accept': 'text/html,*/*' },
+      });
+      return new Response(await response.text(), {
+        status: response.status,
+        headers: {
+          'Content-Type': response.headers.get('Content-Type') || 'text/html',
+          'Access-Control-Allow-Origin': '*',
+        },
+      });
+    } catch (err) {
+      return new Response('Proxy error: ' + err.message, { status: 502 });
+    }
+  },
+};
+```
+
+**Other options:**
+- PHP proxy on your server
+- Node.js proxy service
+- Any CORS-enabled fetch proxy
+
+Update the proxy endpoint in `src/fetch.ts` to point to your proxy URL.
+
+---
+
 ## Core Concepts
 
 ### 1. Measured Values

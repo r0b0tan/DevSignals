@@ -111,7 +111,8 @@ function proxyRequest(
   proxyReq.end();
 }
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+  base: '/',
   plugins: [
     react(),
     {
@@ -139,4 +140,4 @@ export default defineConfig({
       },
     },
   ],
-});
+}));
