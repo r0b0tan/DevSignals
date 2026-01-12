@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 interface HeaderBarProps {
   url?: string;
@@ -42,7 +41,6 @@ export function HeaderBar({
   isRunning = false,
   mode = 'analysis',
 }: HeaderBarProps) {
-  const navigate = useNavigate();
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
 
@@ -76,14 +74,6 @@ export function HeaderBar({
   function selectUrl(selectedUrl: string) {
     onUrlChange?.(selectedUrl);
     setShowSuggestions(false);
-  }
-
-  function handleHelpClick() {
-    if (mode === 'help') {
-      navigate('/');
-    } else {
-      navigate('/help');
-    }
   }
 
   return (

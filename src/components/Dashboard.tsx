@@ -361,7 +361,6 @@ function downloadFile(content: string, filename: string, mimeType: string) {
 function ComparisonContent({ entries, onBack }: { entries: AnalysisEntry[]; onBack: () => void }) {
   const navigate = useNavigate();
   const [showIdentical, setShowIdentical] = useState(true);
-  const allEntries = getAnalysisHistory();
   const displayEntries = entries.slice(0, 4);
 
   const metricData = useMemo(() => {
