@@ -42,6 +42,7 @@ export async function fetchHtml(url: string): Promise<FetchResult> {
       signal: controller.signal,
       headers: {
         'Accept': 'text/html,application/xhtml+xml,*/*',
+        'X-Proxy-Key': import.meta.env.VITE_PROXY_API_KEY || '',
       },
     });
 

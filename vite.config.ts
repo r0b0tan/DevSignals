@@ -6,6 +6,32 @@ import http from 'http';
 
 const MAX_REDIRECTS = 5;
 
+// Rate limiting for dev proxy
+const RATE_LIMIT_REQUESTS = 10;
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+
+// SSRF protection
+const BLOCKED_PATTERN = /^(localhost|127\.|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|169\.254\.|0\.0\.0\.0|\[::1\]|\[fc00:|\[fd[0-9a-f]{2}:)/i;
+
+function checkRateLimit(ip: string): { allowed: boolean; retryAfter: number } {
+  const now = Date.now();
+  let entry = rateLimitMap.get(ip);
+
+  if (!entry || now > entry.resetAt) {
+    entry = { count: 0, resetAt: now + RATE_LIMIT_WINDOW_MS };
+    rateLimitMap.set(ip, entry);
+  }
+
+  entry.count++;
+
+  if (entry.count > RATE_LIMIT_REQUESTS) {
+    return { allowed: false, retryAfter: Math.ceil((entry.resetAt - now) / 1000) };
+  }
+
+  return { allowed: true, retryAfter: 0 };
+}
+
 function proxyRequest(
   targetUrl: URL,
   res: ServerResponse,
@@ -119,6 +145,16 @@ export default defineConfig(({ command }) => ({
       name: 'cors-proxy',
       configureServer(server) {
         server.middlewares.use('/proxy', (req: IncomingMessage, res: ServerResponse) => {
+          // Rate limiting (use localhost for dev)
+          const clientIp = req.socket.remoteAddress || '127.0.0.1';
+          const rateCheck = checkRateLimit(clientIp);
+          if (!rateCheck.allowed) {
+            res.statusCode = 429;
+            res.setHeader('Retry-After', String(rateCheck.retryAfter));
+            res.end(`Rate limit exceeded. Try again in ${rateCheck.retryAfter} seconds.`);
+            return;
+          }
+
           const urlParam = new URL(req.url!, 'http://localhost').searchParams.get('url');
           if (!urlParam) {
             res.statusCode = 400;
@@ -132,6 +168,20 @@ export default defineConfig(({ command }) => ({
           } catch {
             res.statusCode = 400;
             res.end('Invalid URL');
+            return;
+          }
+
+          // Protocol check
+          if (!['http:', 'https:'].includes(targetUrl.protocol)) {
+            res.statusCode = 400;
+            res.end('Only HTTP(S) allowed');
+            return;
+          }
+
+          // SSRF protection
+          if (BLOCKED_PATTERN.test(targetUrl.hostname)) {
+            res.statusCode = 403;
+            res.end('Private addresses not allowed');
             return;
           }
 

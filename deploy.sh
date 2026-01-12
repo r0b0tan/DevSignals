@@ -1,7 +1,7 @@
 #!/bin/bash
 ###############################################################################
 # Automated Deployment Script for DocSignals
-# Purpose: Deploy to /docsignals/ subdirectory with automatic credential handling
+# Purpose: Deploy to web root with automatic credential handling
 # Note: Requires .deploy-credentials file (not committed to git)
 ###############################################################################
 
@@ -48,7 +48,7 @@ if [ -n "$SSH_PASSPHRASE" ] && ! command -v expect &> /dev/null; then
 fi
 
 # Configuration
-REMOTE_PATH="/var/www/html/docsignals"
+REMOTE_PATH="/var/www/docsignals"
 
 # Build the project
 echo -e "\n${YELLOW}Building project...${NC}"
