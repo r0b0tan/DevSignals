@@ -693,31 +693,33 @@ export function Dashboard({
 
           {state.status === 'done' && viewMode === 'analysis' && (
             <div className="space-y-8 sm:space-y-10">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <h2 className="text-lg font-semibold text-gray-900">
+              <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between sm:gap-4">
+                <div className="flex flex-col items-center gap-1 sm:flex-row sm:items-center sm:gap-3">
+                  <h2 className="text-lg font-semibold text-gray-900 py-1">
                     Analysis Results
                   </h2>
-                  {state.analyzedUrl && (
-                    <>
-                      <span className="text-gray-300">|</span>
-                      <span className="text-sm text-gray-500">
-                        {(() => {
-                          try {
-                            return new URL(state.analyzedUrl).hostname;
-                          } catch {
-                            return state.analyzedUrl;
-                          }
-                        })()}
-                      </span>
-                    </>
-                  )}
-                  {state.analyzedAt && (
-                    <>
-                      <span className="text-gray-300">•</span>
-                      <TimestampPill timestamp={state.analyzedAt} />
-                    </>
-                  )}
+                  <div className="flex items-center gap-2 py-2">
+                    {state.analyzedUrl && (
+                      <>
+                        <span className="hidden text-gray-300 sm:inline">|</span>
+                        <span className="text-sm text-gray-500">
+                          {(() => {
+                            try {
+                              return new URL(state.analyzedUrl).hostname;
+                            } catch {
+                              return state.analyzedUrl;
+                            }
+                          })()}
+                        </span>
+                      </>
+                    )}
+                    {state.analyzedAt && (
+                      <>
+                        <span className="text-gray-300">•</span>
+                        <TimestampPill timestamp={state.analyzedAt} />
+                      </>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3">
                   {/* Fetches Dropdown */}
@@ -725,14 +727,14 @@ export function Dashboard({
                     <button
                       onClick={() => setShowFetchDropdown(!showFetchDropdown)}
                       onBlur={() => setTimeout(() => setShowFetchDropdown(false), 200)}
-                      className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-white px-2 py-1.5 text-sm font-medium text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50 sm:px-3"
+                      className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50"
                       title={`${fetchCount} ${fetchCount === 1 ? 'Fetch' : 'Fetches'}`}
                     >
                       <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                       </svg>
-                      <span className="hidden sm:inline">{fetchCount} {fetchCount === 1 ? 'Fetch' : 'Fetches'}</span>
-                      <svg className={`hidden h-4 w-4 text-gray-400 transition-transform sm:block ${showFetchDropdown ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <span>{fetchCount} {fetchCount === 1 ? 'Fetch' : 'Fetches'}</span>
+                      <svg className={`h-4 w-4 text-gray-400 transition-transform ${showFetchDropdown ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                       </svg>
                     </button>
@@ -760,14 +762,14 @@ export function Dashboard({
                       <button
                         onClick={() => setShowHistoryDropdown(!showHistoryDropdown)}
                         onBlur={() => setTimeout(() => setShowHistoryDropdown(false), 200)}
-                        className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-white px-2 py-1.5 text-sm font-medium text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50 sm:px-3"
+                        className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50"
                         title="History"
                       >
                         <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span className="hidden sm:inline">History</span>
-                        <svg className={`hidden h-4 w-4 text-gray-400 transition-transform sm:block ${showHistoryDropdown ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <span>History</span>
+                        <svg className={`h-4 w-4 text-gray-400 transition-transform ${showHistoryDropdown ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                         </svg>
                       </button>
@@ -815,13 +817,13 @@ export function Dashboard({
                   {hasHistory && (
                     <button
                       onClick={handleCompare}
-                      className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-white px-2 py-1.5 text-sm font-medium text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50 sm:px-3"
+                      className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50"
                       title="Compare"
                     >
                       <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
                       </svg>
-                      <span className="hidden sm:inline">Compare</span>
+                      <span>Compare</span>
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
