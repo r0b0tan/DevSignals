@@ -697,8 +697,11 @@ export function Dashboard({
                 <div className="flex items-center gap-3">
                   <h2 className="text-lg font-semibold text-gray-900">
                     Analysis Results
-                    {state.analyzedUrl && (
-                      <span className="ml-2 text-sm font-normal text-gray-500">
+                  </h2>
+                  {state.analyzedUrl && (
+                    <>
+                      <span className="text-gray-300">|</span>
+                      <span className="text-sm text-gray-500">
                         {(() => {
                           try {
                             return new URL(state.analyzedUrl).hostname;
@@ -707,9 +710,14 @@ export function Dashboard({
                           }
                         })()}
                       </span>
-                    )}
-                  </h2>
-                  {state.analyzedAt && <TimestampPill timestamp={state.analyzedAt} />}
+                    </>
+                  )}
+                  {state.analyzedAt && (
+                    <>
+                      <span className="text-gray-300">•</span>
+                      <TimestampPill timestamp={state.analyzedAt} />
+                    </>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3">
                   {/* Fetches Dropdown */}
@@ -764,7 +772,7 @@ export function Dashboard({
                         </svg>
                       </button>
                       {showHistoryDropdown && (
-                        <div className="absolute right-0 top-full z-20 mt-1 w-72 max-h-64 overflow-y-auto rounded-lg bg-white py-1 shadow-lg ring-1 ring-black/5">
+                        <div className="absolute right-0 top-full z-20 mt-1 w-72 max-h-64 overflow-y-auto overflow-x-hidden rounded-lg bg-white py-1 shadow-lg ring-1 ring-black/5">
                           <p className="px-3 py-1.5 text-xs font-medium text-gray-400">Recent analyses</p>
                           {analysisHistory.map((entry, index) => {
                             const hostname = (() => {
@@ -785,16 +793,18 @@ export function Dashboard({
                                 className={`block w-full px-3 py-2 text-left hover:bg-gray-50 ${isActive ? 'bg-indigo-50' : ''}`}
                               >
                                 <div className="flex items-center justify-between gap-2">
-                                  <span className={`text-sm truncate ${isActive ? 'font-medium text-indigo-700' : 'text-gray-700'}`}>
-                                    {hostname}
-                                  </span>
+                                  <div className="min-w-0 flex-1">
+                                    <span className={`block text-sm truncate ${isActive ? 'font-medium text-indigo-700' : 'text-gray-700'}`}>
+                                      {hostname}
+                                    </span>
+                                    <p className="mt-0.5 text-xs text-gray-400 truncate">{entry.url}</p>
+                                  </div>
                                   <Tooltip text={getFullTimestamp(entry.timestamp)}>
                                     <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500 flex-shrink-0 cursor-default">
                                       {getRelativeTime(entry.timestamp)}
                                     </span>
                                   </Tooltip>
                                 </div>
-                                <p className="mt-0.5 text-xs text-gray-400 truncate">{entry.url}</p>
                               </button>
                             );
                           })}
