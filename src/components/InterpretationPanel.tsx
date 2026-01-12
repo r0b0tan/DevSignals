@@ -5,6 +5,7 @@ interface Interpretation {
   category: string;
   finding: React.ReactNode;
   implication: React.ReactNode;
+  baseline?: string; // e.g., "Typical for SPA", "Common for static pages"
 }
 
 function generateInterpretations(
@@ -16,12 +17,12 @@ function generateInterpretations(
 
   // Structure consistency
   if (structure.classification === 'deterministic') {
-    const finding = fetchCount === 1 
+    const finding = fetchCount === 1
       ? 'Single fetch completed'
       : `Identical across ${fetchCount} fetches`;
     const implication = fetchCount === 1
-      ? 'Baseline captured; multiple fetches needed to verify consistency across visits.'
-      : 'Machines can expect consistent content representation on each visit.';
+      ? 'Baseline captured. Run multiple fetches to verify consistency.'
+      : 'The page delivers the same content on each visit, making it easy to cache and index.';
     interpretations.push({
       category: 'Structure Consistency',
       finding,
@@ -30,14 +31,15 @@ function generateInterpretations(
   } else if (structure.classification === 'mostly-deterministic') {
     interpretations.push({
       category: 'Structure Consistency',
-      finding: `${structure.differenceCount} minor variation(s) detected`,
-      implication: 'Structure is largely stable but machines may encounter small differences between visits.',
+      finding: `${structure.differenceCount} minor variation(s)`,
+      implication: 'The page is mostly stable with small differences between visits.',
     });
   } else {
     interpretations.push({
       category: 'Structure Consistency',
-      finding: `${structure.differenceCount} structural difference(s) detected`,
-      implication: 'Machines may encounter varying content representations, which can complicate parsing and indexing.',
+      finding: `${structure.differenceCount} structural difference(s)`,
+      implication: 'Content changes between visits, which can make parsing and caching less reliable.',
+      baseline: 'Typical for SPAs and dynamic content',
     });
   }
 
@@ -46,25 +48,26 @@ function generateInterpretations(
     interpretations.push({
       category: 'Semantic Headings',
       finding: '1 H1, sequential hierarchy',
-      implication: 'Document outline can be reliably parsed for topic identification and navigation.',
+      implication: 'The document has a clear outline that helps machines identify the main topic.',
     });
   } else if (semantics.headings.h1Count === 0) {
     interpretations.push({
       category: 'Semantic Headings',
-      finding: 'No H1 element present',
-      implication: 'Machines cannot identify the primary topic from markup and may rely on heuristics or content analysis.',
+      finding: 'H1 not present',
+      implication: 'Machines will infer the page topic from other content instead.',
+      baseline: 'Common for app shells and client-rendered pages',
     });
   } else if (semantics.headings.h1Count > 1) {
     interpretations.push({
       category: 'Semantic Headings',
-      finding: `${semantics.headings.h1Count} H1 elements present`,
-      implication: 'Multiple primary headings can create ambiguity about document structure and topic hierarchy.',
+      finding: `${semantics.headings.h1Count} H1 elements`,
+      implication: 'Multiple main headings can make the topic hierarchy less clear.',
     });
   } else if (semantics.headings.hasSkips) {
     interpretations.push({
       category: 'Semantic Headings',
       finding: 'Heading hierarchy has gaps',
-      implication: 'Automated tools may need to reconstruct the intended outline structure from context.',
+      implication: 'Skipped heading levels mean the outline needs to be reconstructed from context.',
     });
   }
 
@@ -72,20 +75,21 @@ function generateInterpretations(
   if (semantics.landmarks.coveragePercent >= 80) {
     interpretations.push({
       category: 'Semantic Landmarks',
-      finding: `${semantics.landmarks.coveragePercent}% within semantic regions`,
-      implication: 'Content regions are explicitly defined, enabling reliable navigation and content extraction.',
+      finding: `${semantics.landmarks.coveragePercent}% in semantic regions`,
+      implication: 'Most content is in clearly defined regions, making navigation and extraction straightforward.',
     });
   } else if (semantics.landmarks.coveragePercent >= 50) {
     interpretations.push({
       category: 'Semantic Landmarks',
-      finding: `${semantics.landmarks.coveragePercent}% within semantic regions`,
-      implication: 'Some content areas are explicitly defined; others may require contextual interpretation.',
+      finding: `${semantics.landmarks.coveragePercent}% in semantic regions`,
+      implication: 'About half the content is in semantic regions; some boundaries need to be guessed.',
     });
   } else {
     interpretations.push({
       category: 'Semantic Landmarks',
-      finding: `${semantics.landmarks.coveragePercent}% within semantic regions`,
-      implication: 'Machines often need to infer content boundaries from visual cues or surrounding context.',
+      finding: `${semantics.landmarks.coveragePercent}% in semantic regions`,
+      implication: 'Most content boundaries will be inferred from context rather than markup.',
+      baseline: 'Common for legacy sites or framework markup',
     });
   }
 
@@ -93,14 +97,14 @@ function generateInterpretations(
   if (structure.maxDepth >= 15) {
     interpretations.push({
       category: 'Structure Depth',
-      finding: `${structure.maxDepth} levels of nesting`,
-      implication: 'Deep nesting may require machines to traverse multiple layers to infer context.',
+      finding: `${structure.maxDepth} levels deep`,
+      implication: 'Deep nesting can slow down traversal and make context harder to infer.',
     });
   } else if (structure.maxDepth >= 10) {
     interpretations.push({
       category: 'Structure Depth',
-      finding: `${structure.maxDepth} levels of nesting`,
-      implication: 'Moderate nesting depth; machines may need to traverse several layers to infer context.',
+      finding: `${structure.maxDepth} levels deep`,
+      implication: 'Moderate nesting depth, typical for most pages.',
     });
   }
 
@@ -109,19 +113,19 @@ function generateInterpretations(
     interpretations.push({
       category: 'Structure Sections',
       finding: `${structure.topLevelSections} top-level sections`,
-      implication: 'Clear top-level segmentation allows machines to identify major content regions early during parsing.',
+      implication: 'The page is well-segmented, making it easy to identify distinct regions.',
     });
   } else if (structure.topLevelSections > 0) {
     interpretations.push({
       category: 'Structure Sections',
       finding: `${structure.topLevelSections} top-level section${structure.topLevelSections === 1 ? '' : 's'}`,
-      implication: 'Limited top-level segmentation; machines may need to infer content region boundaries from other cues.',
+      implication: 'Limited segmentation means some region boundaries need to be guessed.',
     });
   } else {
     interpretations.push({
       category: 'Structure Sections',
       finding: 'No top-level sections',
-      implication: 'Without explicit top-level segmentation, machines must infer content region boundaries from context.',
+      implication: 'Without explicit sections, regions will be inferred from the content itself.',
     });
   }
 
@@ -130,7 +134,7 @@ function generateInterpretations(
     interpretations.push({
       category: 'Structure Shadow DOM',
       finding: `${structure.customElements} shadow DOM host${structure.customElements === 1 ? '' : 's'}`,
-      implication: 'Content inside shadow DOM boundaries is not visible to standard document traversal methods.',
+      implication: 'Some content is hidden in shadow DOM and may not be visible to standard parsing.',
     });
   }
 
@@ -140,19 +144,20 @@ function generateInterpretations(
     interpretations.push({
       category: 'Semantic Markup',
       finding: `${divPercent}% generic containers`,
-      implication: 'Structural meaning often relies on class names or visual presentation rather than semantic markup.',
+      implication: 'Most elements are generic divs, so meaning is derived from class names rather than HTML semantics.',
+      baseline: 'Common for component frameworks (React, Vue)',
     });
   } else if (semantics.divRatio > 0.4) {
     interpretations.push({
       category: 'Semantic Markup',
       finding: `${divPercent}% generic containers`,
-      implication: 'Balance between semantic and presentational markup; some interpretation may be needed.',
+      implication: 'A mix of semantic and generic elements; structure is partially self-describing.',
     });
   } else {
     interpretations.push({
       category: 'Semantic Markup',
       finding: `${divPercent}% generic containers`,
-      implication: 'Semantic elements predominate, providing clear structural cues for automated parsing.',
+      implication: 'Most elements have semantic meaning, making the structure self-describing.',
     });
   }
 
@@ -161,13 +166,13 @@ function generateInterpretations(
     interpretations.push({
       category: 'Semantic Links',
       finding: `${semantics.linkIssues} non-descriptive link(s)`,
-      implication: 'Link purpose may need to be inferred from surrounding text or context.',
+      implication: 'Some links use generic text like "click here", so their purpose must be inferred from context.',
     });
   } else {
     interpretations.push({
       category: 'Semantic Links',
-      finding: 'All links have descriptive text',
-      implication: 'Link destinations can be understood without additional context.',
+      finding: 'All links descriptive',
+      implication: 'All links clearly describe their destination, making navigation easy to understand.',
     });
   }
 
@@ -177,19 +182,19 @@ function generateInterpretations(
       interpretations.push({
         category: 'Semantic Time',
         finding: `${semantics.timeElements.total} time element${semantics.timeElements.total === 1 ? '' : 's'} with datetime`,
-        implication: 'Machine-readable timestamps allow unambiguous date extraction without parsing natural language.',
+        implication: 'All timestamps are machine-readable, making date extraction reliable.',
       });
     } else if (semantics.timeElements.withDatetime > 0) {
       interpretations.push({
         category: 'Semantic Time',
-        finding: `${semantics.timeElements.withDatetime}/${semantics.timeElements.total} time elements with datetime`,
-        implication: 'Some timestamps are machine-readable; others require natural language date parsing.',
+        finding: `${semantics.timeElements.withDatetime}/${semantics.timeElements.total} with datetime`,
+        implication: 'Some timestamps are machine-readable; others need to be parsed from text.',
       });
     } else {
       interpretations.push({
         category: 'Semantic Time',
-        finding: `${semantics.timeElements.total} time element${semantics.timeElements.total === 1 ? '' : 's'} without datetime`,
-        implication: 'Time elements lack machine-readable datetime attributes, requiring natural language date parsing.',
+        finding: `${semantics.timeElements.total} without datetime`,
+        implication: 'Dates are displayed as text only, so they need to be parsed and interpreted.',
       });
     }
   }
@@ -199,7 +204,7 @@ function generateInterpretations(
     interpretations.push({
       category: 'Semantic Lists',
       finding: `${semantics.lists.total} list structure${semantics.lists.total === 1 ? '' : 's'}`,
-      implication: 'List markup signals enumerable content, allowing machines to identify item boundaries without heuristics.',
+      implication: 'Lists provide clear item boundaries, making enumeration straightforward.',
     });
   }
 
@@ -209,8 +214,8 @@ function generateInterpretations(
     if (withoutHeaders > 0) {
       interpretations.push({
         category: 'Semantic Tables',
-        finding: `${withoutHeaders} table${withoutHeaders === 1 ? '' : 's'} without header markup`,
-        implication: 'Tables without header markup require machines to infer which cells are labels versus data.',
+        finding: `${withoutHeaders} table${withoutHeaders === 1 ? '' : 's'} without headers`,
+        implication: 'Tables without headers require column meanings to be guessed from content.',
       });
     }
   }
@@ -220,33 +225,33 @@ function generateInterpretations(
     interpretations.push({
       category: 'Semantic Language',
       finding: 'Language declared',
-      implication: 'Language declaration allows machines to apply appropriate text processing and tokenization rules.',
+      implication: 'The page specifies its language, enabling correct text processing.',
     });
   } else {
     interpretations.push({
       category: 'Semantic Language',
-      finding: 'No language declared',
-      implication: 'Without a lang attribute, machines must detect the document language through content analysis.',
+      finding: 'Language not declared',
+      implication: 'The language will be detected automatically from the content.',
     });
   }
 
   // Images
   if (semantics.images.total > 0) {
     const { total, withAlt, emptyAlt, missingAlt, inFigure } = semantics.images;
-    
+
     // Alt text coverage
     if (missingAlt === 0) {
       interpretations.push({
         category: 'Image Accessibility',
-        finding: 'All images have alt attributes',
-        implication: 'Machines can distinguish between meaningful images (with descriptions) and decorative ones (empty alt).',
+        finding: 'All images have alt',
+        implication: 'Every image is clearly marked as meaningful or decorative.',
       });
     } else if (missingAlt > 0) {
       const percent = Math.round((missingAlt / total) * 100);
       interpretations.push({
         category: 'Image Accessibility',
-        finding: `${missingAlt} image${missingAlt === 1 ? '' : 's'} missing alt attribute (${percent}%)`,
-        implication: 'Machines cannot determine whether these images convey meaning or are purely decorative.',
+        finding: `${missingAlt} image${missingAlt === 1 ? '' : 's'} without alt (${percent}%)`,
+        implication: 'Some images lack alt text, so their purpose must be guessed from context.',
       });
     }
 
@@ -255,8 +260,8 @@ function generateInterpretations(
       const percent = Math.round((inFigure / total) * 100);
       interpretations.push({
         category: 'Image Context',
-        finding: `${inFigure} image${inFigure === 1 ? '' : 's'} in figure elements (${percent}%)`,
-        implication: 'Figure markup provides semantic grouping and potential caption association for machine understanding.',
+        finding: `${inFigure} in figure elements (${percent}%)`,
+        implication: 'Images in figures can be associated with their captions automatically.',
       });
     }
 
@@ -264,8 +269,8 @@ function generateInterpretations(
     if (emptyAlt > 0 && withAlt > 0) {
       interpretations.push({
         category: 'Image Classification',
-        finding: `${withAlt} meaningful, ${emptyAlt} decorative image${emptyAlt === 1 ? '' : 's'}`,
-        implication: 'Clear distinction between content images and decorative elements allows machines to prioritize relevant visuals.',
+        finding: `${withAlt} meaningful, ${emptyAlt} decorative`,
+        implication: 'Images are clearly classified, so machines know which ones carry content.',
       });
     }
   }
@@ -283,7 +288,7 @@ export function InterpretationPanel({ structure, semantics, fetchCount }: Interp
   const interpretations = generateInterpretations(structure, semantics, fetchCount);
 
   return (
-    <div className="rounded-xl bg-white p-5 shadow-sm ring-1 ring-gray-200/60 sm:p-6">
+    <div className="rounded-xl bg-white p-5 shadow-sm ring-1 ring-indigo-300 sm:p-6">
       <div className="mb-5">
         <h3 className="text-sm font-semibold text-gray-900">
           Interpretation{' '}
@@ -298,7 +303,7 @@ export function InterpretationPanel({ structure, semantics, fetchCount }: Interp
         {interpretations.map((item, index) => (
           <div
             key={index}
-            className="rounded-lg bg-gray-50/80 p-4 ring-1 ring-gray-200/40"
+            className="rounded-lg bg-indigo-50/50 p-4"
           >
             <div className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-400">
               {item.category}
@@ -309,6 +314,11 @@ export function InterpretationPanel({ structure, semantics, fetchCount }: Interp
               </div>
               <div className="text-sm leading-relaxed text-gray-600">
                 {item.implication}
+                {item.baseline && (
+                  <Tooltip text={item.baseline}>
+                    <span className="ml-1 inline-flex items-center justify-center w-[1em] h-[1em] rounded-full bg-indigo-600 text-white text-[0.7em] font-medium cursor-help align-middle">?</span>
+                  </Tooltip>
+                )}
               </div>
             </div>
           </div>

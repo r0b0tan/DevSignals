@@ -135,6 +135,13 @@ export function ComparisonView({ entries, onClose }: ComparisonViewProps) {
           </button>
         </div>
 
+        <div className="px-6 pt-4">
+          <div className="rounded-lg bg-slate-50 px-4 py-3 text-sm text-slate-600">
+            <span className="font-medium text-slate-700">Reading note:</span>{' '}
+            Values differ due to page type and rendering model. Differences are highlighted but do not imply better or worse.
+          </div>
+        </div>
+
         <div className="overflow-x-auto p-6">
           <table className="w-full">
             <thead>
@@ -257,7 +264,7 @@ export function ComparisonView({ entries, onClose }: ComparisonViewProps) {
             Close
           </button>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">Export:</span>
+            <span className="text-sm text-gray-500" title="Raw signals for further processing">Export data:</span>
             <button
               onClick={() => {
                 const content = generateComparisonJSON(entries);

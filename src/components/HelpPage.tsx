@@ -88,10 +88,10 @@ const helpEntries: HelpEntry[] = [
     category: 'Semantics',
     shortDescription: 'How much content is within semantic regions?',
     longDescription:
-      'Landmark elements (<main>, <nav>, <header>, <footer>, <aside>, <article>) and equivalent ARIA landmark roles create navigational regions in the accessibility tree. When most meaningful content is placed inside these regions, assistive technologies can offer region-jump shortcuts, and automated extractors can distinguish primary content from boilerplate more reliably. Low landmark coverage usually means the page relies on generic containers, requiring heuristics to infer region semantics from class names or layout.',
+      'Landmark elements (<main>, <nav>, <header>, <footer>, <aside>, <article>) and equivalent ARIA landmark roles create navigational regions in the accessibility tree. When most meaningful content is placed inside these regions, assistive technologies can offer region-jump shortcuts, and automated extractors can distinguish primary content from boilerplate more reliably. Low landmark coverage usually means the page relies on generic containers, requiring heuristics to infer region semantics from class names or layout. Coverage levels: Full coverage (95%+), Strong coverage (80-94%), Good coverage (65-79%), Partial coverage (50-64%), Limited coverage (30-49%), Sparse coverage (under 30%).',
     example: '<main>Main content</main><aside>Sidebar</aside>',
-    goodValue: '80% or more content in landmarks',
-    badValue: 'Under 50% in landmarks',
+    goodValue: 'Strong coverage or better (80%+)',
+    badValue: 'Sparse or Limited coverage (under 50%)',
   },
   {
     term: 'main',
@@ -142,9 +142,9 @@ const helpEntries: HelpEntry[] = [
     category: 'Semantics',
     shortDescription: 'Ratio of generic to semantic elements',
     longDescription:
-      'This signal estimates how much of the document is expressed with generic containers (<div>/<span>) versus semantic elements (e.g., <main>, <nav>, <section>, <article>, <button>, <time>, headings). Semantic elements provide intrinsic meaning that is reflected in the accessibility tree and is easier to interpret programmatically. A high generic ratio typically means meaning is encoded only via CSS and class names, which is more brittle for crawlers, readers, and downstream extraction pipelines.',
-    goodValue: 'Under 40% generic containers',
-    badValue: 'Over 60% generic containers',
+      'This signal estimates how much of the document is expressed with generic containers (<div>/<span>) versus semantic elements (e.g., <main>, <nav>, <section>, <article>, <button>, <time>, headings). Semantic elements provide intrinsic meaning that is reflected in the accessibility tree and is easier to interpret programmatically. A high generic ratio typically means meaning is encoded only via CSS and class names, which is more brittle for crawlers, readers, and downstream extraction pipelines. Ratio levels: Highly semantic (under 20%), Semantic-rich (20-40%), Balanced markup (40-55%), Generic-leaning (55-70%), Generic-heavy (70-85%), Mostly generic (85-92%), Nearly all generic (92-97%), All generic (97%+).',
+    goodValue: 'Semantic-rich or better (under 40% generic)',
+    badValue: 'Generic-heavy or worse (over 70% generic)',
   },
   {
     term: 'Generic Containers',

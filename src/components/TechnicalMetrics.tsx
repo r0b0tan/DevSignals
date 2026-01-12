@@ -197,12 +197,12 @@ export function TechnicalMetrics({ structure, semantics, fetchCount }: Technical
                   value={semantics.images.emptyAlt}
                 />
                 <MetricRow
-                  label={<>Missing <Code>alt</Code> {' '}
+                  label={<>Without <Code>alt</Code> {' '}
                     <Tooltip text="Images without any alt attribute. Machines cannot determine if the image is meaningful or decorative.">
                       <span className="text-indigo-700">ⓘ</span>
                     </Tooltip>
                   </>}
-                  value={semantics.images.missingAlt}
+                  value={semantics.images.missingAlt === 0 ? <span className="text-slate-400">0</span> : semantics.images.missingAlt}
                 />
               </div>
               <div className="divide-y divide-gray-100">

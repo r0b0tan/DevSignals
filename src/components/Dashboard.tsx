@@ -97,40 +97,47 @@ interface MetricDefinition {
 
 function ProgressBar({ value, max = 100 }: { value: number; max?: number }) {
   const percent = Math.min(100, Math.max(0, (value / max) * 100));
+  
+  let label: string;
+  if (percent >= 95) label = 'Full coverage';
+  else if (percent >= 80) label = 'Strong coverage';
+  else if (percent >= 65) label = 'Good coverage';
+  else if (percent >= 50) label = 'Partial coverage';
+  else if (percent >= 30) label = 'Limited coverage';
+  else label = 'Sparse coverage';
+  
   return (
-    <div className="flex items-center gap-2.5">
-      <div className="h-1 w-12 rounded-full bg-slate-100">
-        <div className="h-1 rounded-full bg-indigo-500" style={{ width: `${percent}%` }} />
-      </div>
-      <span className="text-sm tabular-nums text-slate-700">{value}%</span>
-    </div>
+    <span className="text-sm text-slate-700">{label}</span>
   );
 }
 
 function RatioIndicator({ value, allValues }: { value: number; allValues: number[] }) {
   const percent = value * 100;
-  let qualifier: string;
-  if (percent <= 40) qualifier = 'Low';
-  else if (percent <= 70) qualifier = 'Med';
-  else qualifier = 'High';
+  
+  let label: string;
+  if (percent <= 20) label = 'Highly semantic';
+  else if (percent <= 40) label = 'Semantic-rich';
+  else if (percent <= 55) label = 'Balanced markup';
+  else if (percent <= 70) label = 'Generic-leaning';
+  else if (percent <= 85) label = 'Generic-heavy';
+  else if (percent <= 92) label = 'Mostly generic';
+  else if (percent <= 97) label = 'Nearly all generic';
+  else label = 'All generic';
 
   const maxVal = Math.max(...allValues);
   const minVal = Math.min(...allValues);
   const isDeviation = allValues.length > 1 && value === maxVal && value !== minVal;
 
   return (
-    <span className="text-sm">
-      <span className="text-slate-700">{qualifier}</span>{' '}
-      <span className={`text-xs tabular-nums ${isDeviation ? 'text-indigo-600' : 'text-slate-400'}`}>
-        ({percent.toFixed(0)}%)
-      </span>
+    <span className={`text-sm ${isDeviation ? 'text-indigo-600' : 'text-slate-700'}`}>
+      {label}
     </span>
   );
 }
 
 function H1Display({ count }: { count: number }) {
   if (count === 0) {
-    return <span className="text-sm text-slate-500">0 <span className="text-slate-400">(missing)</span></span>;
+    return <span className="text-sm text-slate-500">0 <span className="text-slate-400">(not present)</span></span>;
   }
   if (count === 1) {
     return <span className="text-sm tabular-nums text-slate-700">1</span>;
@@ -138,57 +145,47 @@ function H1Display({ count }: { count: number }) {
   return <span className="text-sm tabular-nums text-slate-700">{count} <span className="text-slate-400">(multiple)</span></span>;
 }
 
-function SignalLabel({ struct, sem }: { struct: string; sem: string }) {
-  const semLabel = sem === 'explicit' ? 'Explicit' : sem === 'partial' ? 'Partial' : 'Opaque';
+function StructurePill({ classification }: { classification: string }) {
+  const config = {
+    deterministic: { label: 'Deterministic', classes: 'border-slate-500 text-slate-500' },
+    'mostly-deterministic': { label: 'Mostly Deterministic', classes: 'border-indigo-400 text-indigo-400' },
+    unstable: { label: 'Unstable', classes: 'border-indigo-500 text-indigo-500' },
+  }[classification] ?? { label: classification, classes: 'border-slate-400 text-slate-400' };
 
-  const structTooltip = struct === 'deterministic' 
-    ? 'Structure: DOM is identical across requests' 
-    : struct === 'mostly-deterministic' 
-    ? 'Structure: Minor variations between requests'
-    : 'Structure: Changes significantly between requests';
-  
-  const semTooltip = sem === 'explicit'
-    ? 'Semantics: Meaning is encoded in HTML elements'
-    : sem === 'partial'
-    ? 'Semantics: Some semantic structure, with gaps'
-    : 'Semantics: Meaning relies on visual presentation';
-
-  const tooltipText = `${structTooltip}\n${semTooltip}`;
-
-  const isBad = struct === 'unstable' || sem === 'opaque';
-  const isGood = struct === 'deterministic' && sem === 'explicit';
-
-  const infoIcon = (
-    <Tooltip text={tooltipText}>
-      <span className="text-indigo-600 ml-1.5 cursor-help">ⓘ</span>
-    </Tooltip>
-  );
-
-  const baseClasses = 'text-xs font-medium rounded px-1.5 py-0.5 border';
-
-  if (isBad) {
-    return (
-      <span className="inline-flex items-center">
-        <span className={`${baseClasses} text-indigo-600 border-indigo-300 bg-white`}>{semLabel}</span>
-        {infoIcon}
-      </span>
-    );
-  }
-
-  if (isGood) {
-    return (
-      <span className="inline-flex items-center">
-        <span className={`${baseClasses} text-slate-400 border-slate-200 bg-white`}>{semLabel}</span>
-        {infoIcon}
-      </span>
-    );
-  }
+  const tooltip = classification === 'deterministic'
+    ? 'DOM is identical across requests'
+    : classification === 'mostly-deterministic'
+    ? 'Minor variations between requests'
+    : 'Changes significantly between requests';
 
   return (
-    <span className="inline-flex items-center">
-      <span className={`${baseClasses} text-slate-600 border-slate-300 bg-white`}>{semLabel}</span>
-      {infoIcon}
-    </span>
+    <Tooltip text={tooltip}>
+      <span className={`inline-block rounded-full px-3 py-1 text-xs font-medium border cursor-help ${config.classes}`}>
+        {config.label}
+      </span>
+    </Tooltip>
+  );
+}
+
+function SemanticsPill({ classification }: { classification: string }) {
+  const config = {
+    explicit: { label: 'Explicit', classes: 'border-slate-500 text-slate-500' },
+    partial: { label: 'Partial', classes: 'border-indigo-400 text-indigo-400' },
+    opaque: { label: 'Opaque', classes: 'border-indigo-500 text-indigo-500' },
+  }[classification] ?? { label: classification, classes: 'border-slate-400 text-slate-400' };
+
+  const tooltip = classification === 'explicit'
+    ? 'Meaning is encoded in HTML elements'
+    : classification === 'partial'
+    ? 'Some semantic structure, with gaps'
+    : 'Meaning relies on visual presentation';
+
+  return (
+    <Tooltip text={tooltip}>
+      <span className={`inline-block rounded-full px-3 py-1 text-xs font-medium border cursor-help ${config.classes}`}>
+        {config.label}
+      </span>
+    </Tooltip>
   );
 }
 
@@ -198,7 +195,7 @@ function IssueDisplay({ count, allCounts }: { count: number; allCounts: number[]
   const isWorst = count === maxCount && count > minCount;
 
   if (count === 0) {
-    return <span className="text-sm tabular-nums text-slate-400">0</span>;
+    return <span className="text-sm tabular-nums text-slate-400">None</span>;
   }
 
   if (isWorst) {
@@ -300,6 +297,27 @@ const CORE_METRICS: MetricDefinition[] = [
   },
 ];
 
+function getLandmarkCoverageLabel(percent: number): string {
+  if (percent >= 95) return 'Full coverage';
+  if (percent >= 80) return 'Strong coverage';
+  if (percent >= 65) return 'Good coverage';
+  if (percent >= 50) return 'Partial coverage';
+  if (percent >= 30) return 'Limited coverage';
+  return 'Sparse coverage';
+}
+
+function getDivRatioLabel(ratio: number): string {
+  const percent = ratio * 100;
+  if (percent <= 20) return 'Highly semantic';
+  if (percent <= 40) return 'Semantic-rich';
+  if (percent <= 55) return 'Balanced markup';
+  if (percent <= 70) return 'Generic-leaning';
+  if (percent <= 85) return 'Generic-heavy';
+  if (percent <= 92) return 'Mostly generic';
+  if (percent <= 97) return 'Nearly all generic';
+  return 'All generic';
+}
+
 function generateComparisonCSV(entries: AnalysisEntry[]): string {
   const headers = ['Metric', ...entries.map((_, i) => `Analysis ${i + 1}`)];
   const rows = [
@@ -308,17 +326,21 @@ function generateComparisonCSV(entries: AnalysisEntry[]): string {
     ['Timestamp', ...entries.map(e => new Date(e.timestamp).toISOString())],
     ['', ...entries.map(() => '')],
     ['STRUCTURE', ...entries.map(() => '')],
+    ['Structure Classification', ...entries.map(e => e.result.structure.classification)],
     ['DOM Nodes', ...entries.map(e => e.result.structure.domNodes.toString())],
     ['Max DOM Depth', ...entries.map(e => e.result.structure.maxDepth.toString())],
     ['Top-level Sections', ...entries.map(e => e.result.structure.topLevelSections.toString())],
     ['', ...entries.map(() => '')],
     ['SEMANTICS', ...entries.map(() => '')],
+    ['Semantics Classification', ...entries.map(e => e.result.semantics.classification)],
     ['H1 Count', ...entries.map(e => e.result.semantics.headings.h1Count.toString())],
-    ['Landmark Coverage %', ...entries.map(e => e.result.semantics.landmarks.coveragePercent.toString())],
-    ['Div/Span Ratio', ...entries.map(e => `${(e.result.semantics.divRatio * 100).toFixed(1)}%`)],
+    ['Landmark Coverage', ...entries.map(e => getLandmarkCoverageLabel(e.result.semantics.landmarks.coveragePercent))],
+    ['Div/Span Ratio', ...entries.map(e => getDivRatioLabel(e.result.semantics.divRatio))],
     ['', ...entries.map(() => '')],
     ['QUALITY', ...entries.map(() => '')],
     ['Link Issues', ...entries.map(e => e.result.semantics.linkIssues.toString())],
+    ['Images', ...entries.map(e => (e.result.semantics.images?.total ?? 0).toString())],
+    ['Images Missing Alt', ...entries.map(e => (e.result.semantics.images?.missingAlt ?? 0).toString())],
   ];
   return rows.map(row => row.map(cell => `"${cell}"`).join(';')).join('\n');
 }
@@ -338,9 +360,11 @@ function generateComparisonJSON(entries: AnalysisEntry[]): string {
       semantics: {
         classification: e.result.semantics.classification,
         h1Count: e.result.semantics.headings.h1Count,
-        landmarkCoverage: e.result.semantics.landmarks.coveragePercent,
-        divRatio: e.result.semantics.divRatio,
+        landmarkCoverage: getLandmarkCoverageLabel(e.result.semantics.landmarks.coveragePercent),
+        divRatio: getDivRatioLabel(e.result.semantics.divRatio),
         linkIssues: e.result.semantics.linkIssues,
+        images: e.result.semantics.images?.total ?? 0,
+        imagesMissingAlt: e.result.semantics.images?.missingAlt ?? 0,
       },
     })),
   }, null, 2);
@@ -453,7 +477,7 @@ function ComparisonContent({ entries, onBack }: { entries: AnalysisEntry[]; onBa
               <tr className="bg-slate-50">
                 <th className="w-40 sticky left-0 bg-slate-50 z-10 px-4 py-3 border-b border-slate-200 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]" />
                 {displayEntries.map((entry, i) => (
-                  <th key={i} className="min-w-[180px] px-4 py-3 text-left font-normal border-b border-slate-200">
+                  <th key={i} className="min-w-[180px] px-4 py-3 text-center font-normal border-b border-slate-200">
                     <div className="truncate text-sm font-medium text-slate-700" title={entry.url}>
                       {new URL(entry.url).hostname.replace('www.', '')}
                     </div>
@@ -465,24 +489,92 @@ function ComparisonContent({ entries, onBack }: { entries: AnalysisEntry[]; onBa
               </tr>
             </thead>
             <tbody>
-              {/* Signal row */}
+              {/* Result row with explanation */}
               <tr className="bg-white">
                 <td className="sticky left-0 bg-white z-10 px-4 py-3 border-b border-slate-200 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
                   <span className="text-sm font-medium text-slate-700">Result</span>
                 </td>
-                {displayEntries.map((entry, i) => (
-                  <td key={i} className="px-4 py-3 border-b border-slate-200">
-                    <SignalLabel struct={entry.result.structure.classification} sem={entry.result.semantics.classification} />
-                  </td>
-                ))}
+                {displayEntries.map((entry, i) => {
+                  const struct = entry.result.structure.classification;
+                  const sem = entry.result.semantics.classification;
+                  const h1Count = entry.result.semantics.headings.h1Count;
+                  const hasSkips = entry.result.semantics.headings.hasSkips;
+                  const landmarkCoverage = entry.result.semantics.landmarks.coveragePercent;
+                  const divRatio = entry.result.semantics.divRatio * 100;
+                  const linkIssues = entry.result.semantics.linkIssues;
+                  const domNodes = entry.result.structure.domNodes;
+                  const maxDepth = entry.result.structure.maxDepth;
+                  
+                  // Build contextual explanation based on multiple signals
+                  const lines: string[] = [];
+                  
+                  // Primary classification message
+                  if (struct === 'deterministic' && sem === 'explicit') {
+                    lines.push('Ideal for machine processing.');
+                  } else if (struct === 'unstable' && sem === 'opaque') {
+                    lines.push('Requires rendering for access.');
+                  } else if (struct === 'unstable') {
+                    lines.push('Structure varies between requests.');
+                  } else if (sem === 'opaque') {
+                    lines.push('Meaning encoded visually.');
+                  } else if (struct === 'deterministic' && sem === 'partial') {
+                    lines.push('Stable with semantic gaps.');
+                  } else if (struct === 'mostly-deterministic') {
+                    lines.push('Minor structural variance.');
+                  } else {
+                    lines.push('Mixed signals detected.');
+                  }
+                  
+                  // Secondary insights based on specific metrics
+                  if (h1Count === 0) {
+                    lines.push('No primary heading found.');
+                  } else if (h1Count > 1) {
+                    lines.push('Multiple H1s detected.');
+                  }
+                  
+                  if (hasSkips) {
+                    lines.push('Heading hierarchy has gaps.');
+                  }
+                  
+                  if (landmarkCoverage < 30) {
+                    lines.push('Limited landmark regions.');
+                  }
+                  
+                  if (divRatio > 85) {
+                    lines.push('Heavy use of generic markup.');
+                  }
+                  
+                  if (linkIssues > 5) {
+                    lines.push('Several link issues found.');
+                  }
+                  
+                  if (maxDepth > 20) {
+                    lines.push('Deeply nested structure.');
+                  }
+                  
+                  if (domNodes > 5000) {
+                    lines.push('Large DOM tree.');
+                  }
+                  
+                  // Take first 2 lines for display
+                  const explanation = lines.slice(0, 2).join('\n');
+                  
+                  return (
+                    <td key={i} className="px-4 py-3 border-b border-slate-200 text-center">
+                      <span className="text-xs text-slate-500 whitespace-pre-line leading-relaxed">{explanation}</span>
+                    </td>
+                  );
+                })}
               </tr>
               {/* Structure group header */}
               <tr className="bg-slate-50">
-                <td className="sticky left-0 bg-slate-50 z-10 px-4 py-1.5 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+                <td className="sticky left-0 bg-slate-50 z-10 px-4 py-2 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Structure</span>
                 </td>
-                {displayEntries.map((_, i) => (
-                  <td key={i} className="px-4 py-1.5" />
+                {displayEntries.map((entry, i) => (
+                  <td key={i} className="px-4 py-2 text-center">
+                    <StructurePill classification={entry.result.structure.classification} />
+                  </td>
                 ))}
               </tr>
               {/* Structure metrics */}
@@ -493,18 +585,20 @@ function ComparisonContent({ entries, onBack }: { entries: AnalysisEntry[]; onBa
                       <span className="text-sm text-slate-500">{m.label}</span>
                     </td>
                     {m.renderedValues.map((value, i) => (
-                      <td key={i} className="px-4 py-2.5 border-b border-slate-50">{value}</td>
+                      <td key={i} className="px-4 py-2.5 border-b border-slate-50 text-center">{value}</td>
                     ))}
                   </tr>
                 )
               ))}
               {/* Semantics group header */}
               <tr className="bg-slate-50">
-                <td className="sticky left-0 bg-slate-50 z-10 px-4 py-1.5 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+                <td className="sticky left-0 bg-slate-50 z-10 px-4 py-2 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Semantics</span>
                 </td>
-                {displayEntries.map((_, i) => (
-                  <td key={i} className="px-4 py-1.5" />
+                {displayEntries.map((entry, i) => (
+                  <td key={i} className="px-4 py-2 text-center">
+                    <SemanticsPill classification={entry.result.semantics.classification} />
+                  </td>
                 ))}
               </tr>
               {/* Semantics metrics */}
@@ -515,7 +609,7 @@ function ComparisonContent({ entries, onBack }: { entries: AnalysisEntry[]; onBa
                       <span className="text-sm text-slate-500">{m.label}</span>
                     </td>
                     {m.renderedValues.map((value, i) => (
-                      <td key={i} className="px-4 py-2.5 border-b border-slate-50">{value}</td>
+                      <td key={i} className="px-4 py-2.5 border-b border-slate-50 text-center">{value}</td>
                     ))}
                   </tr>
                 )
@@ -537,7 +631,7 @@ function ComparisonContent({ entries, onBack }: { entries: AnalysisEntry[]; onBa
                       <span className="text-sm text-slate-500">{m.label}</span>
                     </td>
                     {m.renderedValues.map((value, i) => (
-                      <td key={i} className="px-4 py-2.5 border-b border-slate-50">{value}</td>
+                      <td key={i} className="px-4 py-2.5 border-b border-slate-50 text-center">{value}</td>
                     ))}
                   </tr>
                 )
@@ -559,7 +653,9 @@ function ComparisonContent({ entries, onBack }: { entries: AnalysisEntry[]; onBa
           </svg>
         </button>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-600">Export:</span>
+          <Tooltip text="Raw signals for further processing or integration with other tools">
+            <span className="text-sm text-gray-500 cursor-help">Export data:</span>
+          </Tooltip>
           <button
             onClick={() => {
               const content = generateComparisonJSON(displayEntries);

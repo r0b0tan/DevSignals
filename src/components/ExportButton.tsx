@@ -90,7 +90,7 @@ export function ExportButton({ result, url }: ExportButtonProps) {
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-sm text-gray-600">Export:</span>
+      <span className="text-sm text-gray-500" title="Raw signals for further processing">Export data:</span>
       <button
         onClick={() => handleExport('json')}
         className="rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50"
