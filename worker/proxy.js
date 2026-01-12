@@ -17,8 +17,8 @@ const RATE_LIMIT_WINDOW_SECONDS = 60;
 // In-memory rate limit store (resets on cold start, fine for basic protection)
 const rateLimitMap = new Map();
 
-// SSRF protection - block private/local IPs
-const BLOCKED_PATTERN = /^(localhost|127\.|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|169\.254\.|0\.0\.0\.0|\[::1\]|\[fc00:|\[fd[0-9a-f]{2}:)/i;
+// SSRF protection - block private/local IPs (IPv4 + IPv6)
+const BLOCKED_PATTERN = /^(localhost|127\.|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|169\.254\.|0\.0\.0\.0|\[::1\]|\[fe80:|\[fc[0-9a-f]{2}:|\[fd[0-9a-f]{2}:)/i;
 
 // Allowed origins for CORS
 const ALLOWED_ORIGINS = [

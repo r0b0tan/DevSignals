@@ -11,8 +11,8 @@ const RATE_LIMIT_REQUESTS = 10;
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 
-// SSRF protection
-const BLOCKED_PATTERN = /^(localhost|127\.|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|169\.254\.|0\.0\.0\.0|\[::1\]|\[fc00:|\[fd[0-9a-f]{2}:)/i;
+// SSRF protection - block private/local IPs (IPv4 + IPv6)
+const BLOCKED_PATTERN = /^(localhost|127\.|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|169\.254\.|0\.0\.0\.0|\[::1\]|\[fe80:|\[fc[0-9a-f]{2}:|\[fd[0-9a-f]{2}:)/i;
 
 function checkRateLimit(ip: string): { allowed: boolean; retryAfter: number } {
   const now = Date.now();

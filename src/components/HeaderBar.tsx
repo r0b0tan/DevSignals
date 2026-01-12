@@ -26,8 +26,11 @@ function getUrlHistory(): string[] {
 
 function saveToHistory(url: string) {
   try {
+    // Strip query params to avoid storing sensitive data (tokens, etc.)
+    const urlObj = new URL(url);
+    const cleanUrl = `${urlObj.protocol}//${urlObj.host}${urlObj.pathname}`;
     const history = getUrlHistory();
-    const updated = [url, ...history.filter(u => u !== url)].slice(0, 5);
+    const updated = [cleanUrl, ...history.filter(u => u !== cleanUrl)].slice(0, 5);
     localStorage.setItem('docSignalsHistory', JSON.stringify(updated));
   } catch {}
 }

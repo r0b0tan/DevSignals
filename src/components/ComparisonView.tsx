@@ -307,9 +307,16 @@ export function ComparisonButton({ onCompare }: ComparisonButtonProps) {
 // Storage helpers
 export function saveAnalysis(url: string, result: AnalysisResult) {
   try {
+    // Strip query params to avoid storing sensitive data (tokens, etc.)
+    let cleanUrl = url;
+    try {
+      const urlObj = new URL(url);
+      cleanUrl = `${urlObj.protocol}//${urlObj.host}${urlObj.pathname}`;
+    } catch {}
+
     const history = getAnalysisHistory();
     const entry: AnalysisEntry = {
-      url,
+      url: cleanUrl,
       timestamp: new Date().toISOString(),
       result,
     };
